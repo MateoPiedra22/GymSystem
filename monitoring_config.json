@@ -1,0 +1,552 @@
+{
+  "monitoring_config": {
+    "description": "Configuración de Monitoreo - Sistema de Gimnasio v6",
+    "version": "1.0.0",
+    "timestamp": "2024-01-15T10:00:00Z",
+    
+    "prometheus": {
+      "enabled": true,
+      "port": 9090,
+      "retention_days": 15,
+      "storage": {
+        "path": "/prometheus/data",
+        "size": "50GB"
+      },
+      "scrape_interval": "15s",
+      "evaluation_interval": "15s",
+      "external_labels": {
+        "environment": "production",
+        "application": "gym-system"
+      }
+    },
+    
+    "grafana": {
+      "enabled": true,
+      "port": 3000,
+      "admin_password": "${GRAFANA_PASSWORD}",
+      "dashboards": [
+        "main_dashboard",
+        "system_overview",
+        "application_metrics",
+        "database_metrics",
+        "security_metrics",
+        "business_metrics"
+      ],
+      "datasources": [
+        {
+          "name": "Prometheus",
+          "type": "prometheus",
+          "url": "http://prometheus:9090",
+          "access": "proxy"
+        }
+      ]
+    },
+    
+    "alertmanager": {
+      "enabled": true,
+      "port": 9093,
+      "config": {
+        "global": {
+          "smtp_smarthost": "smtp.gmail.com:587",
+          "smtp_from": "alerts@gym.example.com",
+          "smtp_auth_username": "${SMTP_USERNAME}",
+          "smtp_auth_password": "${SMTP_PASSWORD}"
+        },
+        "route": {
+          "group_by": ["alertname"],
+          "group_wait": "10s",
+          "group_interval": "10s",
+          "repeat_interval": "1h",
+          "receiver": "email-alerts"
+        },
+        "receivers": [
+          {
+            "name": "email-alerts",
+            "email_configs": [
+              {
+                "to": "admin@gym.example.com",
+                "send_resolved": true
+              }
+            ]
+          }
+        ]
+      }
+    },
+    
+    "exporters": {
+      "node_exporter": {
+        "enabled": true,
+        "port": 9100,
+        "collectors": [
+          "cpu",
+          "diskstats",
+          "filesystem",
+          "loadavg",
+          "meminfo",
+          "netdev",
+          "netstat",
+          "textfile",
+          "time",
+          "vmstat"
+        ]
+      },
+      "postgres_exporter": {
+        "enabled": true,
+        "port": 9187,
+        "data_source_names": [
+          "postgresql://postgres:postgres@postgres:5432/gym_production?sslmode=disable"
+        ]
+      },
+      "redis_exporter": {
+        "enabled": true,
+        "port": 9121,
+        "redis_addr": "redis://redis:6379"
+      },
+      "nginx_exporter": {
+        "enabled": true,
+        "port": 9113,
+        "nginx_plus": false
+      },
+      "blackbox_exporter": {
+        "enabled": true,
+        "port": 9115,
+        "modules": {
+          "http_2xx": {
+            "prober": "http",
+            "timeout": "5s"
+          },
+          "http_post_2xx": {
+            "prober": "http",
+            "timeout": "5s",
+            "method": "POST"
+          },
+          "tcp_connect": {
+            "prober": "tcp",
+            "timeout": "5s"
+          },
+          "icmp": {
+            "prober": "icmp",
+            "timeout": "5s"
+          }
+        }
+      }
+    },
+    
+    "alerts": {
+      "enabled": true,
+      "rules": [
+        {
+          "name": "high_cpu_usage",
+          "condition": "cpu_usage > 80%",
+          "duration": "5m",
+          "severity": "warning",
+          "description": "CPU usage is above 80% for more than 5 minutes"
+        },
+        {
+          "name": "high_memory_usage",
+          "condition": "memory_usage > 85%",
+          "duration": "5m",
+          "severity": "warning",
+          "description": "Memory usage is above 85% for more than 5 minutes"
+        },
+        {
+          "name": "high_disk_usage",
+          "condition": "disk_usage > 90%",
+          "duration": "5m",
+          "severity": "critical",
+          "description": "Disk usage is above 90% for more than 5 minutes"
+        },
+        {
+          "name": "service_down",
+          "condition": "service_health == 0",
+          "duration": "1m",
+          "severity": "critical",
+          "description": "Service is down"
+        },
+        {
+          "name": "high_error_rate",
+          "condition": "error_rate > 5%",
+          "duration": "2m",
+          "severity": "critical",
+          "description": "Error rate is above 5% for more than 2 minutes"
+        },
+        {
+          "name": "high_response_time",
+          "condition": "response_time > 2s",
+          "duration": "5m",
+          "severity": "warning",
+          "description": "Response time is above 2 seconds for more than 5 minutes"
+        },
+        {
+          "name": "database_connections_high",
+          "condition": "db_connections > 80",
+          "duration": "5m",
+          "severity": "warning",
+          "description": "Database has more than 80 active connections"
+        },
+        {
+          "name": "redis_memory_high",
+          "condition": "redis_memory > 80%",
+          "duration": "5m",
+          "severity": "warning",
+          "description": "Redis memory usage is above 80%"
+        }
+      ]
+    },
+    
+    "dashboards": {
+      "main_dashboard": {
+        "title": "Sistema de Gimnasio - Dashboard Principal",
+        "panels": [
+          {
+            "title": "CPU Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)"
+              }
+            ]
+          },
+          {
+            "title": "Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "(node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100"
+              }
+            ]
+          },
+          {
+            "title": "Response Time",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))"
+              }
+            ]
+          },
+          {
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total[5m])) by (status)"
+              }
+            ]
+          },
+          {
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{status=~\"5..\"}[5m]) / rate(http_requests_total[5m]) * 100"
+              }
+            ]
+          },
+          {
+            "title": "Database Connections",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "pg_stat_database_numbackends"
+              }
+            ]
+          },
+          {
+            "title": "Redis Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "redis_memory_used_bytes / redis_memory_max_bytes * 100"
+              }
+            ]
+          }
+        ]
+      },
+      "system_overview": {
+        "title": "Vista General del Sistema",
+        "panels": [
+          {
+            "title": "System Load",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "node_load1",
+                "legendFormat": "1m load"
+              },
+              {
+                "expr": "node_load5",
+                "legendFormat": "5m load"
+              },
+              {
+                "expr": "node_load15",
+                "legendFormat": "15m load"
+              }
+            ]
+          },
+          {
+            "title": "Disk Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "(node_filesystem_size_bytes - node_filesystem_free_bytes) / node_filesystem_size_bytes * 100"
+              }
+            ]
+          },
+          {
+            "title": "Network Traffic",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(node_network_receive_bytes_total[5m])",
+                "legendFormat": "{{device}} - Receive"
+              },
+              {
+                "expr": "rate(node_network_transmit_bytes_total[5m])",
+                "legendFormat": "{{device}} - Transmit"
+              }
+            ]
+          }
+        ]
+      },
+      "application_metrics": {
+        "title": "Métricas de la Aplicación",
+        "panels": [
+          {
+            "title": "Active Users",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "gym_active_users_total"
+              }
+            ]
+          },
+          {
+            "title": "Total Classes",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "gym_total_classes"
+              }
+            ]
+          },
+          {
+            "title": "User Registrations",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_user_registrations_total[24h])"
+              }
+            ]
+          },
+          {
+            "title": "Payment Success Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_payment_success_total[5m]) / (rate(gym_payment_success_total[5m]) + rate(gym_payment_failures_total[5m])) * 100"
+              }
+            ]
+          },
+          {
+            "title": "Class Attendance",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_class_attendance_total[1h])"
+              }
+            ]
+          }
+        ]
+      },
+      "database_metrics": {
+        "title": "Métricas de Base de Datos",
+        "panels": [
+          {
+            "title": "Database Size",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "pg_database_size_bytes / 1024 / 1024 / 1024"
+              }
+            ]
+          },
+          {
+            "title": "Active Connections",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "pg_stat_database_numbackends"
+              }
+            ]
+          },
+          {
+            "title": "Query Performance",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(pg_stat_database_tup_fetched[5m])"
+              }
+            ]
+          },
+          {
+            "title": "Transaction Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(pg_stat_database_xact_commit[5m])"
+              }
+            ]
+          }
+        ]
+      },
+      "security_metrics": {
+        "title": "Métricas de Seguridad",
+        "panels": [
+          {
+            "title": "Failed Logins",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_failed_logins_total[5m])"
+              }
+            ]
+          },
+          {
+            "title": "Suspicious Requests",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_suspicious_requests_total[5m])"
+              }
+            ]
+          },
+          {
+            "title": "SSL Certificate Expiry",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "probe_ssl_earliest_cert_expiry - time()"
+              }
+            ]
+          },
+          {
+            "title": "Rate Limiting",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_rate_limit_hits_total[5m])"
+              }
+            ]
+          }
+        ]
+      },
+      "business_metrics": {
+        "title": "Métricas de Negocio",
+        "panels": [
+          {
+            "title": "Revenue",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_revenue_total[1h])"
+              }
+            ]
+          },
+          {
+            "title": "Customer Satisfaction",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "gym_customer_satisfaction_score"
+              }
+            ]
+          },
+          {
+            "title": "Employee Attendance",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_employee_attendance_total[1h])"
+              }
+            ]
+          },
+          {
+            "title": "Equipment Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(gym_equipment_usage_total[1h])"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    
+    "notifications": {
+      "email": {
+        "enabled": true,
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "username": "${SMTP_USERNAME}",
+        "password": "${SMTP_PASSWORD}",
+        "from": "alerts@gym.example.com",
+        "to": ["admin@gym.example.com", "devops@gym.example.com"]
+      },
+      "slack": {
+        "enabled": false,
+        "webhook_url": "${SLACK_WEBHOOK_URL}",
+        "channel": "#alerts",
+        "username": "Monitoring Bot"
+      },
+      "webhook": {
+        "enabled": false,
+        "url": "${WEBHOOK_URL}",
+        "headers": {
+          "Authorization": "Bearer ${WEBHOOK_TOKEN}"
+        }
+      }
+    },
+    
+    "retention": {
+      "metrics": "15d",
+      "logs": "30d",
+      "alerts": "90d"
+    },
+    
+    "performance": {
+      "scrape_timeout": "10s",
+      "evaluation_timeout": "30s",
+      "max_samples_per_query": 50000000,
+      "max_concurrent_queries": 20
+    },
+    
+    "security": {
+      "basic_auth": {
+        "enabled": true,
+        "username": "admin",
+        "password": "${GRAFANA_PASSWORD}"
+      },
+      "ssl": {
+        "enabled": true,
+        "cert_file": "/etc/ssl/certs/monitoring.crt",
+        "key_file": "/etc/ssl/private/monitoring.key"
+      }
+    },
+    
+    "maintenance": {
+      "window": {
+        "day": "sunday",
+        "time": "02:00-04:00",
+        "timezone": "America/New_York"
+      },
+      "tasks": [
+        "cleanup_old_metrics",
+        "optimize_database",
+        "rotate_logs",
+        "update_dashboards"
+      ]
+    }
+  }
+} 

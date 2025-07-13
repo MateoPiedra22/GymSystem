@@ -1,0 +1,29 @@
+# =============================================================================
+# ALERTAS DE SEGURIDAD
+# Sistema de Gestión de Gimnasio v6.0
+# =============================================================================
+
+groups:
+  - name: security_alerts
+    rules:
+      # Alerta de intentos de login fallidos
+      - alert: HighFailedLogins
+        expr: rate(login_failures_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Muchos intentos de login fallidos"
+          description: "Más de 10 intentos de login fallidos por minuto"
+
+      # Alerta de requests sospechosos
+      - alert: SuspiciousRequests
+        expr: rate(http_requests_total{status="403"}[5m]) > 50
+        for: 5m
+        labels:
+          severity: warning
+          service: security
+        annotations:
+          summary: "Muchos requests sospechosos"
+          description: "Más de 50 requests 403 por minuto" 

@@ -1,0 +1,77 @@
+{
+  "timestamp": "2025-07-11T00:48:37.578542",
+  "system": "windows",
+  "rules": {
+    "win_firewall_enable": {
+      "status": "FAILED",
+      "command": "netsh advfirewall set allprofiles state on",
+      "timestamp": "2025-07-11T00:48:37.682325"
+    },
+    "win_rule_ssh_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"SSH In\" dir=in action=allow protocol=TCP localport=22",
+      "timestamp": "2025-07-11T00:48:37.729755"
+    },
+    "win_rule_web_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"HTTP In\" dir=in action=allow protocol=TCP localport=80",
+      "timestamp": "2025-07-11T00:48:37.773750"
+    },
+    "win_rule_web_ssl_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"HTTPS In\" dir=in action=allow protocol=TCP localport=443",
+      "timestamp": "2025-07-11T00:48:37.817980"
+    },
+    "win_rule_backend_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Backend In\" dir=in action=allow protocol=TCP localport=8000",
+      "timestamp": "2025-07-11T00:48:37.864467"
+    },
+    "win_rule_database_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Database In\" dir=in action=allow protocol=TCP localport=5432",
+      "timestamp": "2025-07-11T00:48:37.913255"
+    },
+    "win_rule_redis_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Redis In\" dir=in action=allow protocol=TCP localport=6379",
+      "timestamp": "2025-07-11T00:48:37.963020"
+    },
+    "win_rule_prometheus_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Prometheus In\" dir=in action=allow protocol=TCP localport=9090",
+      "timestamp": "2025-07-11T00:48:38.007735"
+    },
+    "win_rule_grafana_in": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Grafana In\" dir=in action=allow protocol=TCP localport=3000",
+      "timestamp": "2025-07-11T00:48:38.051855"
+    },
+    "win_rule_all_out": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"All Out\" dir=out action=allow",
+      "timestamp": "2025-07-11T00:48:38.098478"
+    },
+    "win_block_telnet": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Block Telnet\" dir=in action=block protocol=TCP localport=23",
+      "timestamp": "2025-07-11T00:48:38.144492"
+    },
+    "win_block_ftp": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Block FTP\" dir=in action=block protocol=TCP localport=21",
+      "timestamp": "2025-07-11T00:48:38.189167"
+    },
+    "win_block_rdp": {
+      "status": "FAILED",
+      "command": "netsh advfirewall firewall add rule name=\"Block RDP\" dir=in action=block protocol=TCP localport=3389",
+      "timestamp": "2025-07-11T00:48:38.233475"
+    }
+  },
+  "status": {},
+  "summary": {
+    "total_rules": 13,
+    "applied": 0,
+    "failed": 13
+  }
+}

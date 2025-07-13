@@ -1,0 +1,157 @@
+# =============================================================================
+# ALERTAS DE INFRAESTRUCTURA
+# Sistema de Gestión de Gimnasio v6.0
+# =============================================================================
+
+groups:
+  # ==========================================================================
+  # ALERTAS DE BASE DE DATOS
+  # ==========================================================================
+  - name: database_alerts
+    rules:
+      # Alerta de conexiones activas altas
+      - alert: HighDatabaseConnections
+        expr: pg_stat_database_numbackends > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Muchas conexiones activas en PostgreSQL"
+          description: "Más de 80 conexiones activas en {{ $labels.instance }}"
+
+      # Alerta de transacciones lentas
+      - alert: SlowDatabaseQueries
+        expr: rate(pg_stat_activity_max_tx_duration{datname!=""}[5m]) > 30
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Consultas lentas en PostgreSQL"
+          description: "Transacciones que duran más de 30 segundos en {{ $labels.instance }}"
+
+      # Alerta de espacio en disco de base de datos
+      - alert: DatabaseDiskSpace
+        expr: (pg_database_size_bytes - pg_database_size_bytes) / pg_database_size_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: database
+        annotations:
+          summary: "Poco espacio en disco para base de datos"
+          description: "Más del 80% del espacio en disco usado en {{ $labels.instance }}"
+
+  # ==========================================================================
+  # ALERTAS DE REDIS
+  # ==========================================================================
+  - name: redis_alerts
+    rules:
+      # Alerta de Redis caído
+      - alert: RedisDown
+        expr: up{job="redis"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: redis
+        annotations:
+          summary: "Redis caído"
+          description: "El servicio Redis no responde en {{ $labels.instance }}"
+
+      # Alerta de memoria alta en Redis
+      - alert: HighRedisMemory
+        expr: redis_memory_used_bytes / redis_memory_max_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Alto uso de memoria en Redis"
+          description: "Más del 80% de memoria usada en Redis en {{ $labels.instance }}"
+
+      # Alerta de conexiones altas en Redis
+      - alert: HighRedisConnections
+        expr: redis_connected_clients > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: redis
+        annotations:
+          summary: "Muchas conexiones en Redis"
+          description: "Más de 100 conexiones activas en Redis en {{ $labels.instance }}"
+
+  # ==========================================================================
+  # ALERTAS DE NGINX
+  # ==========================================================================
+  - name: nginx_alerts
+    rules:
+      # Alerta de Nginx caído
+      - alert: NginxDown
+        expr: up{job="nginx"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: nginx
+        annotations:
+          summary: "Nginx caído"
+          description: "El servicio Nginx no responde en {{ $labels.instance }}"
+
+      # Alerta de errores 5xx altos
+      - alert: HighNginx5xxErrors
+        expr: rate(nginx_http_requests_total{status=~"5.."}[5m]) / rate(nginx_http_requests_total[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: nginx
+        annotations:
+          summary: "Muchos errores 5xx en Nginx"
+          description: "Más del 5% de requests resultan en errores 5xx en {{ $labels.instance }}"
+
+      # Alerta de requests por segundo altos
+      - alert: HighNginxRequestRate
+        expr: rate(nginx_http_requests_total[5m]) > 1000
+        for: 5m
+        labels:
+          severity: warning
+          service: nginx
+        annotations:
+          summary: "Alta tasa de requests en Nginx"
+          description: "Más de 1000 requests por segundo en {{ $labels.instance }}"
+
+  # ==========================================================================
+  # ALERTAS DE CONTENEDORES
+  # ==========================================================================
+  - name: container_alerts
+    rules:
+      # Alerta de contenedor reiniciándose frecuentemente
+      - alert: ContainerRestarting
+        expr: increase(container_restarts_total[15m]) > 5
+        for: 1m
+        labels:
+          severity: warning
+          service: container
+        annotations:
+          summary: "Contenedor reiniciándose frecuentemente"
+          description: "El contenedor {{ $labels.name }} se ha reiniciado más de 5 veces en 15 minutos"
+
+      # Alerta de uso de CPU alto en contenedor
+      - alert: HighContainerCPU
+        expr: rate(container_cpu_usage_seconds_total[5m]) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: container
+        annotations:
+          summary: "Alto uso de CPU en contenedor"
+          description: "El contenedor {{ $labels.name }} usa más del 80% de CPU"
+
+      # Alerta de uso de memoria alto en contenedor
+      - alert: HighContainerMemory
+        expr: container_memory_usage_bytes / container_spec_memory_limit_bytes * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: container
+        annotations:
+          summary: "Alto uso de memoria en contenedor"
+          description: "El contenedor {{ $labels.name }} usa más del 80% de memoria" 

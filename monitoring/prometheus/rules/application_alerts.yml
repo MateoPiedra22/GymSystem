@@ -1,0 +1,81 @@
+# =============================================================================
+# ALERTAS DE LA APLICACIÓN
+# Sistema de Gestión de Gimnasio v6.0
+# =============================================================================
+
+groups:
+  # ==========================================================================
+  # ALERTAS DEL BACKEND
+  # ==========================================================================
+  - name: backend_alerts
+    rules:
+      # Alerta de servicio backend caído
+      - alert: BackendDown
+        expr: up{job="backend-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "Backend API caído"
+          description: "El servicio backend API no responde en {{ $labels.instance }}"
+
+      # Alerta de latencia alta en API
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="backend-api"}[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "Alta latencia en API"
+          description: "El 95% de las requests tardan más de 2 segundos en {{ $labels.instance }}"
+
+      # Alerta de tasa de error alta
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{job="backend-api", status=~"5.."}[5m]) / rate(http_requests_total{job="backend-api"}[5m]) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: backend
+        annotations:
+          summary: "Alta tasa de errores en API"
+          description: "Más del 5% de las requests están fallando en {{ $labels.instance }}"
+
+      # Alerta de requests por segundo altos
+      - alert: HighRequestRate
+        expr: rate(http_requests_total{job="backend-api"}[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: backend
+        annotations:
+          summary: "Alta tasa de requests"
+          description: "Más de 100 requests por segundo en {{ $labels.instance }}"
+
+  # ==========================================================================
+  # ALERTAS DEL FRONTEND
+  # ==========================================================================
+  - name: frontend_alerts
+    rules:
+      # Alerta de servicio frontend caído
+      - alert: FrontendDown
+        expr: up{job="frontend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+        annotations:
+          summary: "Frontend caído"
+          description: "El servicio frontend no responde en {{ $labels.instance }}"
+
+      # Alerta de errores de JavaScript
+      - alert: HighJavaScriptErrors
+        expr: rate(frontend_js_errors_total[5m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          service: frontend
+        annotations:
+          summary: "Muchos errores de JavaScript"
+          description: "Más de 10 errores de JavaScript por minuto en {{ $labels.instance }}" 

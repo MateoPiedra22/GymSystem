@@ -1,0 +1,94 @@
+# Requirements for Production - Backend
+# Solo dependencias necesarias para producción
+
+# FastAPI framework and server
+fastapi>=0.116.0
+uvicorn[standard]>=0.32.1
+python-multipart>=0.0.20
+
+# Database
+sqlalchemy>=2.0.36
+alembic>=1.16.3
+psycopg2-binary>=2.9.10
+asyncpg>=0.30.0
+
+# Auth and security
+pyjwt[crypto]>=2.10.1
+passlib[bcrypt]>=1.7.4
+bcrypt>=4.3.0
+pydantic>=2.10.4
+pydantic-settings>=2.8.0
+email-validator==2.2.0
+itsdangerous>=2.1.2
+
+# Security enhancements
+bleach>=6.2.0
+cryptography>=45.0.5
+pyotp>=2.9.0
+qrcode>=8.0
+argon2-cffi>=25.1.0
+slowapi>=0.1.9
+python-magic>=0.4.27
+
+# Utilities
+python-dotenv>=1.0.1
+requests>=2.32.4
+httpx>=0.28.1
+aiofiles>=24.1.0
+tenacity>=9.0.0
+rich>=13.9.4
+python-dateutil>=2.9.0
+
+# Cache and session
+redis>=5.2.1
+hiredis>=2.3.2
+cachetools>=6.1.0
+
+# Background tasks
+celery>=5.5.3
+apscheduler>=3.11.0
+
+# WebSockets and real-time
+websockets>=14.1
+python-socketio>=5.12.0
+
+# Logging and monitoring
+structlog>=25.1.0
+prometheus-client>=0.21.1
+sentry-sdk>=2.23.0
+
+# Data validation and serialization
+marshmallow>=3.24.0
+cattrs>=25.1.1
+
+# Image handling
+Pillow>=11.0.0
+python-barcode>=0.15.1
+
+# Reports and export
+openpyxl>=3.1.5
+reportlab>=4.2.5
+matplotlib>=3.10.0
+seaborn>=0.13.2
+
+# Email
+emails>=0.6
+
+# Performance
+ujson>=5.10.0
+orjson>=3.10.13
+msgpack>=1.1.0
+
+# System monitoring
+psutil>=6.1.0
+
+# Type stubs (solo para desarrollo)
+# Descomentar solo si se necesita soporte de tipos específicos
+# types-pyjwt>=1.7.1
+# types-passlib>=1.7.7.20241002
+# types-bleach>=6.1.0.20240816
+# types-requests>=2.32.0.20241231
+
+# Additional security updates
+certifi>=2025.7.9
+urllib3>=2.2.3

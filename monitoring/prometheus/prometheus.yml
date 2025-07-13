@@ -1,0 +1,132 @@
+# Configuración de Prometheus - Sistema de Gestión de Gimnasio v6.0
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'gym-system'
+    environment: 'production'
+
+# Configuración de reglas de alerta
+rule_files:
+  - "rules/alerts.yml"
+  - "rules/application_alerts.yml"
+  - "rules/business_alerts.yml"
+  - "rules/security_alerts.yml"
+
+# Configuración de scrape jobs
+scrape_configs:
+  # Prometheus Self-Monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+    scrape_interval: 10s
+    metrics_path: /metrics
+
+  # Backend API Monitoring
+  - job_name: 'backend-api'
+    static_configs:
+      - targets: ['backend:8000']
+    scrape_interval: 15s
+    metrics_path: /metrics
+    scrape_timeout: 10s
+    honor_labels: true
+    
+    # Configuración de autenticación para métricas
+    basic_auth:
+      username: 'prometheus'
+      password: '${PROMETHEUS_PASSWORD:-prometheus_secure_password_2024}'
+    
+    # Configuración de relabeling
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(?::\d+)?'
+        replacement: '${1}'
+      - source_labels: [__address__]
+        target_label: service
+        regex: '([^:]+)'
+        replacement: 'backend-api'
+      - source_labels: [__address__]
+        target_label: environment
+        replacement: '${ENVIRONMENT:-production}'
+
+  # Health Check Monitoring
+  - job_name: 'health-checks'
+    static_configs:
+      - targets:
+        - http://frontend:3000
+        - http://backend:8000/health
+        - http://nginx:80/nginx-health
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # ==========================================================================
+  # CUSTOM METRICS
+  # ==========================================================================
+  - job_name: 'custom-metrics'
+    static_configs:
+      - targets: ['backend:8000']
+    scrape_interval: 30s
+    metrics_path: /custom-metrics
+    scrape_timeout: 10s
+    
+    # Configuración de relabeling
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        regex: '([^:]+)(?::\d+)?'
+        replacement: '${1}'
+      - source_labels: [__address__]
+        target_label: service
+        regex: '([^:]+)'
+        replacement: 'custom-metrics'
+
+# Configuración de almacenamiento
+storage:
+  tsdb:
+    path: /prometheus/data
+    retention.time: 30d
+    retention.size: 10GB
+    wal:
+      retention.period: 12h
+    out_of_order_time_window: 10m
+
+# Configuración de alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - alertmanager:9093
+
+# Configuración de logging
+log:
+  level: info
+  format: json
+
+# Configuración de web
+web:
+  listen_address: 0.0.0.0:9090
+  read_timeout: 5m
+  max_connections: 512
+  external_url: http://prometheus:9090/
+  
+  # Configuración de CORS
+  cors:
+    allowed_origins:
+      - http://localhost:3000
+      - http://localhost:3001
+      - https://your-domain.com
+      - https://www.your-domain.com
+
+# Configuración de compresión
+compression:
+  enabled: true
+  level: 6
+
+# Configuración de límites
+limits:
+  max_samples_per_query: 1000000
+  max_concurrent_queries: 20
+  max_concurrent_remote_reads: 10
+  max_concurrent_remote_writes: 10 

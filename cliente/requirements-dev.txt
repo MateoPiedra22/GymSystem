@@ -1,0 +1,19 @@
+# Requirements for Development - Desktop Client
+# Dependencias solo necesarias para desarrollo y testing
+
+# Development y testing
+pytest>=7.4.3,<8.0.0
+pytest-qt>=4.2.0,<5.0.0
+pytest-asyncio>=0.21.1,<1.0.0
+pytest-cov>=4.1.0,<5.0.0
+black>=23.11.0,<24.0.0
+flake8>=6.1.0,<7.0.0
+mypy>=1.7.0,<2.0.0
+
+# Performance monitoring
+memory-profiler>=0.61.0,<1.0.0
+py-spy>=0.3.14,<1.0.0
+
+# Packaging
+PyInstaller>=6.2.0,<7.0.0
+auto-py-to-exe>=2.40.0,<3.0.0 

@@ -1,0 +1,105 @@
+{
+  "deployment": {
+    "name": "Sistema de Gestión de Gimnasio v6.0",
+    "version": "6.0.0",
+    "environment": "production",
+    "domain": "localhost",
+    "ssl_mode": "self-signed",
+    "ssl_email": "admin@example.com"
+  },
+  "services": {
+    "backend": {
+      "port": 8000,
+      "memory_limit": "1G",
+      "workers": 4
+    },
+    "frontend": {
+      "port": 3000,
+      "memory_limit": "512M"
+    },
+    "nginx": {
+      "http_port": 80,
+      "https_port": 443
+    },
+    "postgres": {
+      "port": 5432,
+      "memory_limit": "1G"
+    },
+    "redis": {
+      "port": 6379,
+      "memory_limit": "512M"
+    },
+    "prometheus": {
+      "port": 9090,
+      "memory_limit": "1G"
+    },
+    "grafana": {
+      "port": 3000,
+      "username": "admin",
+      "password": "admin123"
+    },
+    "pgadmin": {
+      "port": 5050,
+      "email": "admin@example.com",
+      "password": "admin123"
+    }
+  },
+  "monitoring": {
+    "enabled": true,
+    "retention_days": 30,
+    "alerting": {
+      "enabled": true,
+      "email": {
+        "enabled": false,
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "username": "",
+        "password": "",
+        "from": "",
+        "to": []
+      },
+      "slack": {
+        "enabled": false,
+        "webhook_url": "",
+        "channel": "#alerts"
+      }
+    }
+  },
+  "backup": {
+    "enabled": true,
+    "schedule": "0 2 * * *",
+    "retention_days": 90,
+    "encryption": true,
+    "aws": {
+      "enabled": false,
+      "access_key_id": "",
+      "secret_access_key": "",
+      "bucket": "",
+      "region": "us-east-1"
+    }
+  },
+  "security": {
+    "force_https": true,
+    "secure_cookies": true,
+    "rate_limiting": true,
+    "rate_limit": 100,
+    "max_login_attempts": 5,
+    "lockout_time": 30,
+    "session_timeout": 15,
+    "allowed_hosts": ["localhost", "127.0.0.1"],
+    "cors_origins": ["https://localhost:3000", "https://localhost"]
+  },
+  "logging": {
+    "level": "INFO",
+    "file_rotation": true,
+    "max_size": "100MB",
+    "backup_count": 5
+  },
+  "performance": {
+    "max_upload_size": "5MB",
+    "max_request_size": "10MB",
+    "cache_ttl": 3600,
+    "database_pool_size": 20,
+    "database_max_overflow": 30
+  }
+} 

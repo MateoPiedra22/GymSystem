@@ -1,0 +1,268 @@
+# Docker Compose para Producción - Sistema de Gestión de Gimnasio v6.0
+
+services:
+  # Base de datos PostgreSQL
+  postgres:
+    image: postgres:15.5
+    container_name: gym_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${GYM_DB_NAME}
+      POSTGRES_USER: ${GYM_DB_USER}
+      POSTGRES_PASSWORD: ${GYM_DB_PASSWORD}
+      TZ: UTC
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:${GYM_DB_PORT}:5432"
+    networks:
+      - gym_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${GYM_DB_USER} -d ${GYM_DB_NAME}"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${BACKEND_MEMORY_LIMIT}
+          cpus: '1.0'
+        reservations:
+          memory: 512m
+          cpus: '0.5'
+
+  # Cache Redis
+  redis:
+    image: redis:7-alpine
+    container_name: gym_redis
+    restart: always
+    environment:
+      TZ: UTC
+    command: redis-server --requirepass ${GYM_REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru --protected-mode yes --tcp-keepalive 300 --timeout 0 --tcp-backlog 511 --save 900 1 --save 300 10 --save 60 10000
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:${REDIS_PORT}:6379"
+    networks:
+      - gym_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${GYM_REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: '0.5'
+        reservations:
+          memory: 128m
+          cpus: '0.25'
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: production
+    container_name: gym_backend
+    restart: always
+    environment:
+      - GYM_ENV=${GYM_ENV}
+      - GYM_DEBUG=${GYM_DEBUG}
+      - TZ=UTC
+      - GYM_DB_HOST=postgres
+      - GYM_DB_PORT=5432
+      - GYM_DB_NAME=${GYM_DB_NAME}
+      - GYM_DB_USER=${GYM_DB_USER}
+      - GYM_DB_PASSWORD=${GYM_DB_PASSWORD}
+      - GYM_DB_SSL_MODE=${GYM_DB_SSL_MODE}
+      - GYM_REDIS_HOST=redis
+      - GYM_REDIS_PORT=${REDIS_PORT}
+      - GYM_REDIS_PASSWORD=${GYM_REDIS_PASSWORD}
+      - GYM_SECRET_KEY=${GYM_SECRET_KEY}
+      - GYM_JWT_SECRET_KEY=${GYM_JWT_SECRET_KEY}
+      - GYM_BACKUP_KEY=${GYM_BACKUP_KEY}
+      - BACKEND_PORT=${BACKEND_PORT}
+      - BACKEND_WORKERS=${BACKEND_WORKERS}
+      - LOG_LEVEL=${LOG_LEVEL}
+      - GYM_METRICS_PORT=${GYM_METRICS_PORT}
+      - GYM_FORCE_HTTPS=${GYM_FORCE_HTTPS}
+      - GYM_SECURE_COOKIES=${GYM_SECURE_COOKIES}
+      - GYM_SAMESITE_COOKIES=${GYM_SAMESITE_COOKIES}
+      - GYM_ALLOWED_HOSTS=${GYM_ALLOWED_HOSTS}
+      - GYM_CORS_ORIGINS=${GYM_CORS_ORIGINS}
+      - GYM_SECURITY_HEADERS=${GYM_SECURITY_HEADERS}
+      - GYM_RATE_LIMITING=${GYM_RATE_LIMITING}
+      - GYM_RATE_LIMIT=${GYM_RATE_LIMIT}
+      - GYM_MAX_LOGIN_ATTEMPTS=${GYM_MAX_LOGIN_ATTEMPTS}
+      - GYM_LOCKOUT_TIME=${GYM_LOCKOUT_TIME}
+      - GYM_SESSION_TIMEOUT=${GYM_SESSION_TIMEOUT}
+      - GYM_MAX_UPLOAD_SIZE=${GYM_MAX_UPLOAD_SIZE}
+      - GYM_MAX_REQUEST_SIZE=${GYM_MAX_REQUEST_SIZE}
+      - GYM_ALLOWED_EXTENSIONS=${GYM_ALLOWED_EXTENSIONS}
+      - GYM_AUDIT_LOG=${GYM_AUDIT_LOG}
+      - GYM_PROMETHEUS_METRICS=${GYM_PROMETHEUS_METRICS}
+    volumes:
+      - backend_logs:/app/logs
+      - backend_uploads:/app/uploads
+    ports:
+      - "127.0.0.1:${BACKEND_PORT}:${BACKEND_PORT}"
+      - "127.0.0.1:${GYM_METRICS_PORT}:${GYM_METRICS_PORT}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - gym_network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/cache
+    deploy:
+      resources:
+        limits:
+          memory: ${BACKEND_MEMORY_LIMIT}
+          cpus: '1.0'
+        reservations:
+          memory: 512m
+          cpus: '0.5'
+
+  # Frontend Web - Optimizado para Next.js
+  frontend:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - NODE_ENV=${NODE_ENV}
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    container_name: gym_frontend
+    restart: always
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_ENABLE_DEBUG=${NEXT_PUBLIC_ENABLE_DEBUG}
+      - NEXT_PUBLIC_LOG_LEVEL=${NEXT_PUBLIC_LOG_LEVEL}
+      - NEXT_PUBLIC_ENABLE_ANALYTICS=${NEXT_PUBLIC_ENABLE_ANALYTICS}
+      - FRONTEND_PORT=${FRONTEND_PORT}
+      - TZ=UTC
+      - PORT=${FRONTEND_PORT}
+      - HOSTNAME=0.0.0.0
+    volumes:
+      - frontend_logs:/app/logs
+      - frontend_cache:/app/.next/cache
+    ports:
+      - "127.0.0.1:${FRONTEND_PORT}:${FRONTEND_PORT}"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - gym_network
+    security_opt:
+      - no-new-privileges:true
+    # read_only: true (eliminado para permitir escritura en .next)
+    tmpfs:
+      - /tmp
+      - /var/cache
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${FRONTEND_PORT}/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${FRONTEND_MEMORY_LIMIT}
+          cpus: '1.0'
+        reservations:
+          memory: 512m
+          cpus: '0.5'
+
+  # Reverse Proxy Nginx - Optimizado para Web
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: gym_nginx
+    restart: always
+    environment:
+      TZ: UTC
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+      - nginx_cache:/var/cache/nginx
+    ports:
+      - "${HTTP_PORT}:80"
+      - "${HTTPS_PORT}:443"
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - gym_network
+    security_opt:
+      - no-new-privileges:true
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.5'
+        reservations:
+          memory: 256m
+          cpus: '0.25'
+
+# Volúmenes
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_logs:
+    driver: local
+  backend_uploads:
+    driver: local
+  frontend_logs:
+    driver: local
+  frontend_cache:
+    driver: local
+  nginx_logs:
+    driver: local
+  nginx_cache:
+    driver: local
+
+# Redes
+networks:
+  gym_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+    # Configuración de seguridad de red
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0" 
