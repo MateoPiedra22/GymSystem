@@ -139,14 +139,29 @@ async def login_simple(user_credentials: UserLogin):
     }
 
 @router.post("/login-debug")
-async def login_debug(user_credentials: UserLogin):
+async def login_debug(user_credentials: UserLogin, db: Session = Depends(get_db)):
     """Debug login endpoint to test step by step"""
     try:
-        # Step 1: Test basic functionality
+        # Step 1: Check if user exists
+        user = db.query(User).filter(User.email == user_credentials.email).first()
+        if not user:
+            return {
+                "step": "1",
+                "error": "User not found",
+                "email": user_credentials.email
+            }
+        
+        # Step 2: Check password
+        password_valid = auth_manager.verify_password(user_credentials.password, user.password_hash)
+        
         return {
-            "step": "1",
-            "message": "Basic endpoint works",
-            "email": user_credentials.email
+            "step": "2",
+            "user_found": True,
+            "user_id": user.id,
+            "user_email": user.email,
+            "user_active": user.is_active,
+            "password_valid": password_valid,
+            "password_hash": user.password_hash[:20] + "..."
         }
     except Exception as e:
         return {

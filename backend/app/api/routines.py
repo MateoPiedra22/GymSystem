@@ -21,7 +21,7 @@ from ..schemas.routine import (
     WorkoutSession, WorkoutSessionResponse
 )
 
-router = APIRouter(prefix="/routines", tags=["Routines"])
+router = APIRouter(tags=["Routines"])
 
 # Routine Templates
 @router.get("/templates", response_model=RoutineTemplateList)

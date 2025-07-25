@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { PaymentsService } from '../api/services/payments'
+import { paymentsService } from '../api'
 import {
   Payment,
   PaymentMethod,
@@ -197,7 +197,7 @@ export const usePaymentStore = create<PaymentState>()(
         getPayments: async (params?: PaymentSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await PaymentsService.getPayments(params)
+            const response = await paymentsService.getPayments(params)
             set({
               payments: response.items,
               paymentPagination: {
@@ -219,7 +219,7 @@ export const usePaymentStore = create<PaymentState>()(
         getPayment: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const payment = await PaymentsService.getPayment(id)
+            const payment = await paymentsService.getPayment(id)
             set({ currentPayment: payment, loading: false })
           } catch (error: any) {
             set({ 
@@ -232,7 +232,7 @@ export const usePaymentStore = create<PaymentState>()(
         createPayment: async (data: CreatePaymentRequest) => {
           set({ loading: true, error: null })
           try {
-            const newPayment = await PaymentsService.createPayment(data)
+            const newPayment = await paymentsService.createPayment(data)
             const { payments } = get()
             set({ 
               payments: [newPayment, ...payments],
@@ -251,7 +251,7 @@ export const usePaymentStore = create<PaymentState>()(
         processPayment: async (data: ProcessPaymentRequest) => {
           set({ loading: true, error: null })
           try {
-            const processedPayment = await PaymentsService.processPayment(data)
+            const processedPayment = await paymentsService.processPayment(data)
             const { payments, currentPayment } = get()
             set({ 
               payments: payments.map(p => p.id === processedPayment.id ? processedPayment : p),
@@ -271,7 +271,7 @@ export const usePaymentStore = create<PaymentState>()(
         refundPayment: async (data: RefundPaymentRequest) => {
           set({ loading: true, error: null })
           try {
-            const refundedPayment = await PaymentsService.refundPayment(data)
+            const refundedPayment = await paymentsService.refundPayment(data)
             const { payments, currentPayment } = get()
             set({ 
               payments: payments.map(p => p.id === refundedPayment.id ? refundedPayment : p),
@@ -291,7 +291,7 @@ export const usePaymentStore = create<PaymentState>()(
         cancelPayment: async (id: number, reason?: string) => {
           set({ loading: true, error: null })
           try {
-            const cancelledPayment = await PaymentsService.cancelPayment(id, reason)
+            const cancelledPayment = await paymentsService.cancelPayment(id, reason)
             const { payments, currentPayment } = get()
             set({ 
               payments: payments.map(p => p.id === id ? cancelledPayment : p),
@@ -312,7 +312,7 @@ export const usePaymentStore = create<PaymentState>()(
         getPaymentMethods: async (userId?: number) => {
           set({ loading: true, error: null })
           try {
-            const response = await PaymentsService.getPaymentMethods(userId)
+            const response = await paymentsService.getPaymentMethods(userId)
             set({ paymentMethods: response.items, loading: false })
           } catch (error: any) {
             set({ 
@@ -325,7 +325,7 @@ export const usePaymentStore = create<PaymentState>()(
         getPaymentMethod: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const paymentMethod = await PaymentsService.getPaymentMethod(id)
+            const paymentMethod = await paymentsService.getPaymentMethod(id)
             set({ currentPaymentMethod: paymentMethod, loading: false })
           } catch (error: any) {
             set({ 
@@ -343,7 +343,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const newPaymentMethod = await PaymentsService.addPaymentMethod(data)
+            const newPaymentMethod = await paymentsService.addPaymentMethod(data)
             const { paymentMethods } = get()
             set({ 
               paymentMethods: [newPaymentMethod, ...paymentMethods],
@@ -365,7 +365,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const updatedPaymentMethod = await PaymentsService.updatePaymentMethod(id, data)
+            const updatedPaymentMethod = await paymentsService.updatePaymentMethod(id, data)
             const { paymentMethods, currentPaymentMethod } = get()
             set({ 
               paymentMethods: paymentMethods.map(pm => pm.id === id ? updatedPaymentMethod : pm),
@@ -385,7 +385,7 @@ export const usePaymentStore = create<PaymentState>()(
         deletePaymentMethod: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await PaymentsService.deletePaymentMethod(id)
+            await paymentsService.deletePaymentMethod(id)
             const { paymentMethods } = get()
             set({ 
               paymentMethods: paymentMethods.filter(pm => pm.id !== id),
@@ -404,7 +404,7 @@ export const usePaymentStore = create<PaymentState>()(
         setDefaultPaymentMethod: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedPaymentMethod = await PaymentsService.setDefaultPaymentMethod(id)
+            const updatedPaymentMethod = await paymentsService.setDefaultPaymentMethod(id)
             const { paymentMethods, currentPaymentMethod } = get()
             set({ 
               paymentMethods: paymentMethods.map(pm => ({
@@ -432,7 +432,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const paymentStats = await PaymentsService.getPaymentStatistics(params)
+            const paymentStats = await paymentsService.getPaymentStatistics(params)
             set({ paymentStats, loading: false })
           } catch (error: any) {
             set({ 
@@ -446,7 +446,7 @@ export const usePaymentStore = create<PaymentState>()(
         getInvoices: async (params?: PaginationParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await PaymentsService.getInvoices(params)
+            const response = await paymentsService.getInvoices(params)
             set({
               invoices: response.items,
               invoicePagination: {
@@ -468,7 +468,7 @@ export const usePaymentStore = create<PaymentState>()(
         getInvoice: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const invoice = await PaymentsService.getInvoice(id)
+            const invoice = await paymentsService.getInvoice(id)
             set({ currentInvoice: invoice, loading: false })
           } catch (error: any) {
             set({ 
@@ -481,7 +481,7 @@ export const usePaymentStore = create<PaymentState>()(
         createInvoice: async (data: CreateInvoiceRequest) => {
           set({ loading: true, error: null })
           try {
-            const newInvoice = await PaymentsService.createInvoice(data)
+            const newInvoice = await paymentsService.createInvoice(data)
             const { invoices } = get()
             set({ 
               invoices: [newInvoice, ...invoices],
@@ -500,7 +500,7 @@ export const usePaymentStore = create<PaymentState>()(
         sendInvoice: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await PaymentsService.sendInvoice(id)
+            await paymentsService.sendInvoice(id)
             set({ loading: false })
             return true
           } catch (error: any) {
@@ -515,7 +515,7 @@ export const usePaymentStore = create<PaymentState>()(
         markInvoiceAsPaid: async (id: number, paymentId?: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedInvoice = await PaymentsService.markInvoiceAsPaid(id, paymentId)
+            const updatedInvoice = await paymentsService.markInvoiceAsPaid(id, paymentId)
             const { invoices, currentInvoice } = get()
             set({ 
               invoices: invoices.map(i => i.id === id ? updatedInvoice : i),
@@ -535,7 +535,7 @@ export const usePaymentStore = create<PaymentState>()(
         downloadInvoice: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const blob = await PaymentsService.downloadInvoice(id)
+            const blob = await paymentsService.downloadInvoice(id)
             // Create download link
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
@@ -565,7 +565,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const paymentIntent = await PaymentsService.createPaymentIntent(data)
+            const paymentIntent = await paymentsService.createPaymentIntent(data)
             set({ paymentIntent, loading: false })
             return paymentIntent
           } catch (error: any) {
@@ -583,7 +583,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const confirmedIntent = await PaymentsService.confirmPaymentIntent(intentId, data)
+            const confirmedIntent = await paymentsService.confirmPaymentIntent(intentId, data)
             set({ paymentIntent: confirmedIntent, loading: false })
             return confirmedIntent
           } catch (error: any) {
@@ -599,7 +599,7 @@ export const usePaymentStore = create<PaymentState>()(
         getSubscriptions: async (params?: PaginationParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await PaymentsService.getSubscriptions(params)
+            const response = await paymentsService.getSubscriptions(params)
             set({
               subscriptions: response.items,
               subscriptionPagination: {
@@ -621,7 +621,7 @@ export const usePaymentStore = create<PaymentState>()(
         getSubscription: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const subscription = await PaymentsService.getSubscription(id)
+            const subscription = await paymentsService.getSubscription(id)
             set({ currentSubscription: subscription, loading: false })
           } catch (error: any) {
             set({ 
@@ -639,7 +639,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const newSubscription = await PaymentsService.createSubscription(data)
+            const newSubscription = await paymentsService.createSubscription(data)
             const { subscriptions } = get()
             set({ 
               subscriptions: [newSubscription, ...subscriptions],
@@ -661,7 +661,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const cancelledSubscription = await PaymentsService.cancelSubscription(id, data)
+            const cancelledSubscription = await paymentsService.cancelSubscription(id, data)
             const { subscriptions, currentSubscription } = get()
             set({ 
               subscriptions: subscriptions.map(s => s.id === id ? cancelledSubscription : s),
@@ -681,7 +681,7 @@ export const usePaymentStore = create<PaymentState>()(
         reactivateSubscription: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const reactivatedSubscription = await PaymentsService.reactivateSubscription(id)
+            const reactivatedSubscription = await paymentsService.reactivateSubscription(id)
             const { subscriptions, currentSubscription } = get()
             set({ 
               subscriptions: subscriptions.map(s => s.id === id ? reactivatedSubscription : s),
@@ -702,7 +702,7 @@ export const usePaymentStore = create<PaymentState>()(
         getSubscriptionPlans: async () => {
           set({ loading: true, error: null })
           try {
-            const subscriptionPlans = await PaymentsService.getSubscriptionPlans()
+            const subscriptionPlans = await paymentsService.getSubscriptionPlans()
             set({ subscriptionPlans, loading: false })
           } catch (error: any) {
             set({ 
@@ -715,7 +715,7 @@ export const usePaymentStore = create<PaymentState>()(
         getSubscriptionPlan: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const plan = await PaymentsService.getSubscriptionPlan(id)
+            const plan = await paymentsService.getSubscriptionPlan(id)
             // Store in subscriptionPlans if not already there
             const { subscriptionPlans } = get()
             const existingPlan = subscriptionPlans.find(p => p.id === id)
@@ -735,7 +735,7 @@ export const usePaymentStore = create<PaymentState>()(
         bulkProcessPayments: async (paymentIds: number[]) => {
           set({ loading: true, error: null })
           try {
-            const result = await PaymentsService.bulkProcessPayments(paymentIds)
+            const result = await paymentsService.bulkProcessPayments(paymentIds)
             // Refresh payments list
             await get().getPayments()
             set({ loading: false })
@@ -756,7 +756,7 @@ export const usePaymentStore = create<PaymentState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const result = await PaymentsService.bulkRefundPayments(data)
+            const result = await paymentsService.bulkRefundPayments(data)
             // Refresh payments list
             await get().getPayments()
             set({ loading: false })
@@ -774,7 +774,7 @@ export const usePaymentStore = create<PaymentState>()(
         exportPayments: async (params?: PaymentSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const blob = await PaymentsService.exportPayments(params)
+            const blob = await paymentsService.exportPayments(params)
             // Create download link
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')

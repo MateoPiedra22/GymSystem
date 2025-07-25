@@ -2,33 +2,48 @@ import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 import { cn } from "../../utils/cn"
 
+const TabsContext = React.createContext<{ orientation: "horizontal" | "vertical" }>({ orientation: "horizontal" })
+
 const Tabs = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.Root>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.Root>
 >(({ className, orientation = "horizontal", ...props }, ref) => (
-  <TabsPrimitive.Root
-    ref={ref}
-    orientation={orientation}
-    className={cn("w-full", className)}
-    data-orientation="horizontal"
-    {...props}
-  />
+  <TabsContext.Provider value={{ orientation }}>
+    <TabsPrimitive.Root
+      ref={ref}
+      orientation={orientation}
+      className={cn(
+        "w-full",
+        orientation === "horizontal" ? "flex flex-col gap-4" : "",
+        className
+      )}
+      data-orientation={orientation}
+      {...props}
+    />
+  </TabsContext.Provider>
 ))
 Tabs.displayName = TabsPrimitive.Root.displayName
 
 const TabsList = React.forwardRef<
   React.ElementRef<typeof TabsPrimitive.List>,
   React.ComponentPropsWithoutRef<typeof TabsPrimitive.List>
->(({ className, ...props }, ref) => (
-  <TabsPrimitive.List
-    ref={ref}
-    className={cn(
-      "flex flex-col h-fit w-48 space-y-1 bg-muted p-1 rounded-md text-muted-foreground",
-      className
-    )}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  const { orientation } = React.useContext(TabsContext)
+  
+  return (
+    <TabsPrimitive.List
+      ref={ref}
+      className={cn(
+        "flex bg-muted p-1 rounded-md text-muted-foreground",
+        orientation === "horizontal" 
+          ? "flex-row h-10 w-full space-x-1" 
+          : "flex-col h-fit w-48 space-y-1 flex-shrink-0",
+        className
+      )}
+      {...props}
+    />
+  )
+})
 TabsList.displayName = TabsPrimitive.List.displayName
 
 const TabsTrigger = React.forwardRef<

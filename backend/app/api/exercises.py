@@ -18,7 +18,7 @@ from ..schemas.exercise import (
     ExerciseProgression, ExerciseProgressionResponse
 )
 
-router = APIRouter(prefix="/exercises", tags=["Exercises"])
+router = APIRouter(tags=["Exercises"])
 
 @router.get("/", response_model=ExerciseList)
 async def get_exercises(

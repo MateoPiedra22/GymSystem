@@ -30,6 +30,8 @@ interface AuthState {
   setLoading: (loading: boolean) => void
   setUser: (user: User | null) => void
   setToken: (token: string | null) => void
+  updateOwnerPassword: (newPassword: string) => void
+  getOwnerPassword: () => string
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -47,76 +49,150 @@ export const useAuthStore = create<AuthState>()(
         login: async (credentials: LoginRequest) => {
           set({ loading: true, error: null })
           try {
-            // Handle owner login with master password
-            if (credentials.role === 'owner') {
-              if (credentials.password === '0000') {
-                // Mock owner user data
-                const ownerUser = {
+            // Mock login for testing purposes - Dueño and Profesor roles
+            // Dueño login - only requires password (default: 0000)
+            if (credentials.email === 'Zurka') {
+              const storedOwnerPassword = localStorage.getItem('owner_password') || '0000'
+              if (credentials.password === storedOwnerPassword) {
+                const mockOwnerUser: User = {
                   id: 1,
-                  email: 'owner@zurka.gym',
-                  first_name: 'Dueño',
-                  last_name: 'Zurka',
-                  role: 'owner' as const,
-                  status: 'active' as const,
+                  email: 'zurka@gym.com',
+                  first_name: 'Zurka',
+                  last_name: 'Gym Owner',
+                  role: 'owner',
+                  status: 'active',
                   is_active: true,
+                  phone: '+1234567890',
                   created_at: new Date().toISOString(),
-                  gym_name: 'Zurka'
+                  updated_at: new Date().toISOString()
                 }
                 
-                // Generate mock token
-                const mockToken = 'owner_token_' + Date.now()
+                const mockToken = 'mock-jwt-token-owner-' + Date.now()
                 
-                // Store tokens in localStorage
-                localStorage.setItem('gym_access_token', mockToken)
-                localStorage.setItem('gym_refresh_token', mockToken + '_refresh')
-                
-                set({ 
-                  user: ownerUser, 
+                set({
+                  user: mockOwnerUser,
                   token: mockToken,
                   isAuthenticated: true,
-                  loading: false 
+                  loading: false,
+                  error: null
                 })
+                
+                localStorage.setItem('gym_access_token', mockToken)
                 return
-              } else {
-                throw new Error('Contraseña maestra incorrecta')
               }
+              throw new Error('Contraseña de Zurka incorrecta')
             }
             
-            // Handle trainer login
-            if (credentials.role === 'trainer') {
-              if (credentials.password === 'password' && credentials.trainer_id) {
-                // Mock trainer user data based on trainer_id
-                const trainerUser = {
-                  id: credentials.trainer_id,
-                  email: `trainer${credentials.trainer_id}@zurka.gym`,
-                  first_name: credentials.trainer_id === 1 ? 'Carlos' : credentials.trainer_id === 2 ? 'Maria' : 'Diego',
-                  last_name: credentials.trainer_id === 1 ? 'Rodriguez' : credentials.trainer_id === 2 ? 'Gonzalez' : 'Martinez',
-                  role: 'trainer' as const,
-                  status: 'active' as const,
+            // Profesor login - requires selection and password
+            if (credentials.email.startsWith('profesor_')) {
+              const profesorId = credentials.email.replace('profesor_', '')
+              // For demo purposes, accept any password for professors
+              if (credentials.password && credentials.password.length > 0) {
+                const mockTrainerUser: User = {
+                  id: parseInt(profesorId) || 2,
+                  email: 'profesor@gym.com',
+                  first_name: 'Carlos',
+                  last_name: 'Rodríguez',
+                  role: 'trainer',
+                  status: 'active',
                   is_active: true,
-                  created_at: new Date().toISOString()
+                  phone: '+1234567891',
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
                 }
                 
-                // Generate mock token
-                const mockToken = 'trainer_token_' + Date.now()
+                const mockToken = 'mock-jwt-token-trainer-' + profesorId + '-' + Date.now()
                 
-                // Store tokens in localStorage
-                localStorage.setItem('gym_access_token', mockToken)
-                localStorage.setItem('gym_refresh_token', mockToken + '_refresh')
-                
-                set({ 
-                  user: trainerUser, 
+                set({
+                  user: mockTrainerUser,
                   token: mockToken,
                   isAuthenticated: true,
-                  loading: false 
+                  loading: false,
+                  error: null
                 })
+                
+                localStorage.setItem('gym_access_token', mockToken)
                 return
-              } else {
-                throw new Error('Contraseña incorrecta')
               }
+              throw new Error('Contraseña de profesor incorrecta')
             }
             
-            throw new Error('Tipo de usuario no válido')
+            // Legacy mock logins for backward compatibility
+            if (credentials.email === 'dueno@gym.com' && credentials.password === 'dueno123') {
+              const mockOwnerUser: User = {
+                id: 1,
+                email: 'dueno@gym.com',
+                first_name: 'Juan',
+                last_name: 'Pérez',
+                role: 'owner',
+                status: 'active',
+                is_active: true,
+                phone: '+1234567890',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }
+              
+              const mockToken = 'mock-jwt-token-owner-' + Date.now()
+              
+              set({
+                user: mockOwnerUser,
+                token: mockToken,
+                isAuthenticated: true,
+                loading: false,
+                error: null
+              })
+              
+              localStorage.setItem('gym_access_token', mockToken)
+              return
+            }
+            
+            if (credentials.email === 'profesor@gym.com' && credentials.password === 'profesor123') {
+              const mockTrainerUser: User = {
+                id: 2,
+                email: 'profesor@gym.com',
+                first_name: 'Carlos',
+                last_name: 'Rodríguez',
+                role: 'trainer',
+                status: 'active',
+                is_active: true,
+                phone: '+1234567891',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              }
+              
+              const mockToken = 'mock-jwt-token-trainer-' + Date.now()
+              
+              set({
+                user: mockTrainerUser,
+                token: mockToken,
+                isAuthenticated: true,
+                loading: false,
+                error: null
+              })
+              
+              localStorage.setItem('gym_access_token', mockToken)
+              return
+            }
+            
+            // Use the authentication service for real backend login
+            const response = await authService.login({
+              email: credentials.email,
+              password: credentials.password
+            })
+            
+            set({
+              user: response.user,
+              token: response.access_token,
+              isAuthenticated: true,
+              loading: false,
+              error: null
+            })
+            
+            // Store tokens in localStorage for API calls
+            localStorage.setItem('gym_access_token', response.access_token)
+            if (response.refresh_token) {
+              localStorage.setItem('gym_refresh_token', response.refresh_token)
+            }
           } catch (error: any) {
             const errorMessage = error.message || 'Error al iniciar sesión'
               
@@ -214,6 +290,20 @@ export const useAuthStore = create<AuthState>()(
           const token = state.token || localStorage.getItem('gym_access_token')
           if (!token) {
             return
+          }
+          
+          // Check if it's a mock token
+          if (token.startsWith('mock-jwt-token')) {
+            // For mock tokens, try to get user from state or localStorage
+            if (state.user) {
+              set({
+                user: state.user,
+                isAuthenticated: true,
+                loading: false,
+                error: null
+              })
+              return
+            }
           }
           
           // Don't set loading if we already have user data
@@ -393,6 +483,16 @@ export const useAuthStore = create<AuthState>()(
           } else {
             localStorage.removeItem('gym_access_token')
           }
+        },
+
+        // Method to update owner password
+        updateOwnerPassword: (newPassword: string) => {
+          localStorage.setItem('owner_password', newPassword)
+        },
+        
+        // Method to get current owner password
+        getOwnerPassword: () => {
+          return localStorage.getItem('owner_password') || '0000'
         }
       }),
       {

@@ -18,7 +18,7 @@ from ..schemas.membership import (
     PaymentMethod, PaymentReport
 )
 
-router = APIRouter(prefix="/payments", tags=["Payments"])
+router = APIRouter(tags=["Payments"])
 
 @router.get("/", response_model=PaymentList)
 async def get_payments(

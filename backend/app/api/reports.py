@@ -22,7 +22,7 @@ from ..models.employee import Employee
 # )
 from ..schemas.membership import PaymentReport
 
-router = APIRouter(prefix="/reports", tags=["Reports"])
+router = APIRouter(tags=["Reports"])
 
 # @router.get("/membership-report", response_model=MembershipReport)
 # async def get_membership_report(...):

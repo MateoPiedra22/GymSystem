@@ -20,15 +20,15 @@ import {
 
 export class ExercisesService {
   // Exercises
-  static async getExercises(params?: ExerciseSearchParams): Promise<ExerciseListResponse> {
+  async getExercises(params?: ExerciseSearchParams): Promise<ExerciseListResponse> {
     return apiClient.get(API_ENDPOINTS.EXERCISES.EXERCISES, { params })
   }
 
-  static async getExercise(id: number): Promise<Exercise> {
+  async getExercise(id: number): Promise<Exercise> {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/${id}`)
   }
 
-  static async createExercise(data: CreateExerciseRequest): Promise<Exercise> {
+  async createExercise(data: CreateExerciseRequest): Promise<Exercise> {
     const formData = new FormData()
     
     // Add text fields
@@ -50,7 +50,7 @@ export class ExercisesService {
     return response.data.data
   }
 
-  static async updateExercise(id: number, data: UpdateExerciseRequest): Promise<Exercise> {
+  async updateExercise(id: number, data: UpdateExerciseRequest): Promise<Exercise> {
     const formData = new FormData()
     
     // Add text fields
@@ -72,20 +72,20 @@ export class ExercisesService {
     return response.data.data
   }
 
-  static async deleteExercise(id: number): Promise<void> {
+  async deleteExercise(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EXERCISES.EXERCISES}/${id}`)
   }
 
-  static async toggleExerciseStatus(id: number): Promise<Exercise> {
+  async toggleExerciseStatus(id: number): Promise<Exercise> {
     return apiClient.patch(`${API_ENDPOINTS.EXERCISES.EXERCISES}/${id}/toggle-status`)
   }
 
   // Exercise Categories
-  static async getExerciseCategories(): Promise<ExerciseCategory[]> {
+  async getExerciseCategories(): Promise<ExerciseCategory[]> {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/categories`)
   }
 
-  static async createExerciseCategory(data: {
+  async createExerciseCategory(data: {
     name: string
     description: string
     icon?: string
@@ -94,7 +94,7 @@ export class ExercisesService {
     return apiClient.post(`${API_ENDPOINTS.EXERCISES.EXERCISES}/categories`, data)
   }
 
-  static async updateExerciseCategory(id: number, data: {
+  async updateExerciseCategory(id: number, data: {
     name?: string
     description?: string
     icon?: string
@@ -104,16 +104,16 @@ export class ExercisesService {
     return apiClient.put(`${API_ENDPOINTS.EXERCISES.EXERCISES}/categories/${id}`, data)
   }
 
-  static async deleteExerciseCategory(id: number): Promise<void> {
+  async deleteExerciseCategory(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EXERCISES.EXERCISES}/categories/${id}`)
   }
 
   // Muscle Groups
-  static async getMuscleGroups(): Promise<MuscleGroup[]> {
+  async getMuscleGroups(): Promise<MuscleGroup[]> {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/muscle-groups`)
   }
 
-  static async createMuscleGroup(data: {
+  async createMuscleGroup(data: {
     name: string
     description: string
     body_part: 'upper' | 'lower' | 'core' | 'full_body'
@@ -121,7 +121,7 @@ export class ExercisesService {
     return apiClient.post(`${API_ENDPOINTS.EXERCISES.EXERCISES}/muscle-groups`, data)
   }
 
-  static async updateMuscleGroup(id: number, data: {
+  async updateMuscleGroup(id: number, data: {
     name?: string
     description?: string
     body_part?: 'upper' | 'lower' | 'core' | 'full_body'
@@ -130,16 +130,16 @@ export class ExercisesService {
     return apiClient.put(`${API_ENDPOINTS.EXERCISES.EXERCISES}/muscle-groups/${id}`, data)
   }
 
-  static async deleteMuscleGroup(id: number): Promise<void> {
+  async deleteMuscleGroup(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EXERCISES.EXERCISES}/muscle-groups/${id}`)
   }
 
   // Equipment
-  static async getEquipment(): Promise<Equipment[]> {
+  async getEquipment(): Promise<Equipment[]> {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/equipment`)
   }
 
-  static async createEquipment(data: {
+  async createEquipment(data: {
     name: string
     description: string
     category: string
@@ -151,7 +151,7 @@ export class ExercisesService {
     return apiClient.post(`${API_ENDPOINTS.EXERCISES.EXERCISES}/equipment`, data)
   }
 
-  static async updateEquipment(id: number, data: {
+  async updateEquipment(id: number, data: {
     name?: string
     description?: string
     category?: string
@@ -164,12 +164,12 @@ export class ExercisesService {
     return apiClient.put(`${API_ENDPOINTS.EXERCISES.EXERCISES}/equipment/${id}`, data)
   }
 
-  static async deleteEquipment(id: number): Promise<void> {
+  async deleteEquipment(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EXERCISES.EXERCISES}/equipment/${id}`)
   }
 
   // Workouts
-  static async getWorkouts(params?: {
+  async getWorkouts(params?: {
     user_id?: number
     status?: string
     date_from?: string
@@ -178,27 +178,27 @@ export class ExercisesService {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts`, { params })
   }
 
-  static async getWorkout(id: number): Promise<Workout> {
+  async getWorkout(id: number): Promise<Workout> {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts/${id}`)
   }
 
-  static async createWorkout(data: CreateWorkoutRequest): Promise<Workout> {
+  async createWorkout(data: CreateWorkoutRequest): Promise<Workout> {
     return apiClient.post(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts`, data)
   }
 
-  static async updateWorkout(id: number, data: Partial<CreateWorkoutRequest>): Promise<Workout> {
+  async updateWorkout(id: number, data: Partial<CreateWorkoutRequest>): Promise<Workout> {
     return apiClient.put(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts/${id}`, data)
   }
 
-  static async deleteWorkout(id: number): Promise<void> {
+  async deleteWorkout(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts/${id}`)
   }
 
-  static async startWorkout(id: number): Promise<Workout> {
+  async startWorkout(id: number): Promise<Workout> {
     return apiClient.patch(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts/${id}/start`)
   }
 
-  static async completeWorkout(id: number, data?: {
+  async completeWorkout(id: number, data?: {
     duration_minutes?: number
     calories_burned?: number
     notes?: string
@@ -206,12 +206,12 @@ export class ExercisesService {
     return apiClient.patch(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts/${id}/complete`, data)
   }
 
-  static async cancelWorkout(id: number, reason?: string): Promise<Workout> {
+  async cancelWorkout(id: number, reason?: string): Promise<Workout> {
     return apiClient.patch(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workouts/${id}/cancel`, { reason })
   }
 
   // Workout Templates
-  static async getWorkoutTemplates(params?: {
+  async getWorkoutTemplates(params?: {
     category?: string
     difficulty_level?: string
     is_public?: boolean
@@ -220,11 +220,11 @@ export class ExercisesService {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workout-templates`, { params })
   }
 
-  static async getWorkoutTemplate(id: number): Promise<WorkoutTemplate> {
+  async getWorkoutTemplate(id: number): Promise<WorkoutTemplate> {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/workout-templates/${id}`)
   }
 
-  static async createWorkoutFromTemplate(templateId: number, data: {
+  async createWorkoutFromTemplate(templateId: number, data: {
     workout_date: string
     notes?: string
   }): Promise<Workout> {
@@ -232,7 +232,7 @@ export class ExercisesService {
   }
 
   // Personal Records
-  static async getPersonalRecords(params?: {
+  async getPersonalRecords(params?: {
     user_id?: number
     exercise_id?: number
     record_type?: string
@@ -240,7 +240,7 @@ export class ExercisesService {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/personal-records`, { params })
   }
 
-  static async createPersonalRecord(data: {
+  async createPersonalRecord(data: {
     exercise_id: number
     record_type: 'max_weight' | 'max_reps' | 'max_duration' | 'max_distance'
     value: number
@@ -252,7 +252,7 @@ export class ExercisesService {
     return apiClient.post(`${API_ENDPOINTS.EXERCISES.EXERCISES}/personal-records`, data)
   }
 
-  static async updatePersonalRecord(id: number, data: {
+  async updatePersonalRecord(id: number, data: {
     value?: number
     achieved_date?: string
     notes?: string
@@ -260,16 +260,16 @@ export class ExercisesService {
     return apiClient.put(`${API_ENDPOINTS.EXERCISES.EXERCISES}/personal-records/${id}`, data)
   }
 
-  static async deletePersonalRecord(id: number): Promise<void> {
+  async deletePersonalRecord(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EXERCISES.EXERCISES}/personal-records/${id}`)
   }
 
   // Exercise Statistics
-  static async getExerciseStatistics(): Promise<ExerciseStatistics> {
+  async getExerciseStatistics(): Promise<ExerciseStatistics> {
     return apiClient.get(`${API_ENDPOINTS.EXERCISES.EXERCISES}/statistics`)
   }
 
-  static async getExerciseUsageStats(exerciseId: number): Promise<{
+  async getExerciseUsageStats(exerciseId: number): Promise<{
     total_workouts: number
     total_users: number
     average_sets: number
@@ -281,7 +281,7 @@ export class ExercisesService {
   }
 
   // Bulk Operations
-  static async bulkImportExercises(file: File): Promise<{
+  async bulkImportExercises(file: File): Promise<{
     successful: number
     failed: number
     errors: Array<{ row: number; error: string }>
@@ -289,12 +289,12 @@ export class ExercisesService {
     return apiClient.uploadFile(`${API_ENDPOINTS.EXERCISES.EXERCISES}/bulk-import`, file)
   }
 
-  static async exportExercises(params?: ExerciseSearchParams): Promise<Blob> {
+  async exportExercises(params?: ExerciseSearchParams): Promise<Blob> {
     return apiClient.downloadFile(`${API_ENDPOINTS.EXERCISES.EXERCISES}/export`, { params })
   }
 
   // Exercise Recommendations
-  static async getExerciseRecommendations(params?: {
+  async getExerciseRecommendations(params?: {
     user_id?: number
     muscle_groups?: string[]
     equipment_available?: string[]
@@ -306,4 +306,5 @@ export class ExercisesService {
   }
 }
 
-export const exercisesService = ExercisesService
+export const exercisesService = new ExercisesService()
+export default ExercisesService

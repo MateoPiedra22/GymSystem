@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { ConfigService } from '../api/services/config'
+import { configService } from '../api'
 import type {
   SystemConfig,
   BrandConfig,
@@ -86,7 +86,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     getSystemConfig: async () => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.getConfig()
+        const response = await configService.getConfig()
         set({ systemConfig: response.data, loading: false })
       } catch (error: any) {
         set({ 
@@ -99,7 +99,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     updateSystemConfig: async (data: ConfigUpdateRequest) => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.updateConfig(data)
+        const response = await configService.updateConfig(data)
         set({ systemConfig: response.data, loading: false })
       } catch (error: any) {
         set({ 
@@ -113,7 +113,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     resetSystemConfig: async () => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.resetConfig()
+        const response = await configService.resetConfig()
         set({ systemConfig: response.data, loading: false })
       } catch (error: any) {
         set({ 
@@ -128,7 +128,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     getBrandConfig: async () => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.getBrandConfig()
+        const response = await configService.getBrandConfig()
         set({ brandConfig: response.data, loading: false })
       } catch (error: any) {
         set({ 
@@ -141,7 +141,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     updateBrandConfig: async (data: BrandConfigUpdateRequest) => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.updateBrandConfig(data)
+        const response = await configService.updateBrandConfig(data)
         set({ brandConfig: response.data, loading: false })
       } catch (error: any) {
         set({ 
@@ -155,7 +155,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     uploadLogo: async (file: File) => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.uploadLogo(file)
+        const response = await configService.uploadLogo(file)
         
         // Update brand config with new logo URL
         const { brandConfig } = get()
@@ -179,7 +179,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     uploadFavicon: async (file: File) => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.uploadFavicon(file)
+        const response = await configService.uploadFavicon(file)
         
         // Update brand config with new favicon URL
         const { brandConfig } = get()
@@ -204,7 +204,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     getNotificationConfig: async () => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.getNotificationConfig()
+        const response = await configService.getNotificationConfig()
         set({ notificationConfig: response.data, loading: false })
       } catch (error: any) {
         set({ 
@@ -217,7 +217,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     updateNotificationConfig: async (data: NotificationConfigUpdateRequest) => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.updateNotificationConfig(data)
+        const response = await configService.updateNotificationConfig(data)
         set({ notificationConfig: response.data, loading: false })
       } catch (error: any) {
         set({ 
@@ -231,7 +231,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     testEmailConfig: async (email: string) => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.testEmailConfig(email)
+        const response = await configService.testEmailConfig(email)
         set({ loading: false })
         return response.data.success
       } catch (error: any) {
@@ -246,7 +246,7 @@ export const useConfigStore = create<ConfigState>()(persist(
     testSmsConfig: async (phone: string) => {
       try {
         set({ loading: true, error: null })
-        const response = await ConfigService.testSmsConfig(phone)
+        const response = await configService.testSmsConfig(phone)
         set({ loading: false })
         return response.data.success
       } catch (error: any) {

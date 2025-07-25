@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { ClassesService } from '../api/services/classes'
+import { classesService } from '../api'
 import {
   GymClass,
   ClassSchedule,
@@ -201,7 +201,7 @@ export const useClassStore = create<ClassState>()(
         getClasses: async (params?: ClassSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await ClassesService.getClasses(params)
+            const response = await classesService.getClasses(params)
             set({
               classes: response.items,
               classPagination: {
@@ -223,7 +223,7 @@ export const useClassStore = create<ClassState>()(
         getClass: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const gymClass = await ClassesService.getClass(id)
+            const gymClass = await classesService.getClass(id)
             set({ currentClass: gymClass, loading: false })
           } catch (error: any) {
             set({ 
@@ -236,7 +236,7 @@ export const useClassStore = create<ClassState>()(
         createClass: async (data: CreateClassRequest) => {
           set({ loading: true, error: null })
           try {
-            const newClass = await ClassesService.createClass(data)
+            const newClass = await classesService.createClass(data)
             const { classes } = get()
             set({ 
               classes: [newClass, ...classes],
@@ -255,7 +255,7 @@ export const useClassStore = create<ClassState>()(
         updateClass: async (id: number, data: UpdateClassRequest) => {
           set({ loading: true, error: null })
           try {
-            const updatedClass = await ClassesService.updateClass(id, data)
+            const updatedClass = await classesService.updateClass(id, data)
             const { classes, currentClass } = get()
             set({ 
               classes: classes.map(c => c.id === id ? updatedClass : c),
@@ -275,7 +275,7 @@ export const useClassStore = create<ClassState>()(
         deleteClass: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ClassesService.deleteClass(id)
+            await classesService.deleteClass(id)
             const { classes } = get()
             set({ 
               classes: classes.filter(c => c.id !== id),
@@ -294,7 +294,7 @@ export const useClassStore = create<ClassState>()(
         toggleClassStatus: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedClass = await ClassesService.toggleClassStatus(id)
+            const updatedClass = await classesService.toggleClassStatus(id)
             const { classes, currentClass } = get()
             set({ 
               classes: classes.map(c => c.id === id ? updatedClass : c),
@@ -315,7 +315,7 @@ export const useClassStore = create<ClassState>()(
         getClassCategories: async () => {
           set({ loading: true, error: null })
           try {
-            const categories = await ClassesService.getClassCategories()
+            const categories = await classesService.getClassCategories()
             set({ categories, loading: false })
           } catch (error: any) {
             set({ 
@@ -328,7 +328,7 @@ export const useClassStore = create<ClassState>()(
         createClassCategory: async (data) => {
           set({ loading: true, error: null })
           try {
-            const newCategory = await ClassesService.createClassCategory(data)
+            const newCategory = await classesService.createClassCategory(data)
             const state = get()
             const { categories } = state
             set({ 
@@ -348,7 +348,7 @@ export const useClassStore = create<ClassState>()(
         updateClassCategory: async (id: number, data: any) => {
           set({ loading: true, error: null })
           try {
-            const updatedCategory = await ClassesService.updateClassCategory(id, data)
+            const updatedCategory = await classesService.updateClassCategory(id, data)
             const state = get()
             const { categories } = state
             set({ 
@@ -368,7 +368,7 @@ export const useClassStore = create<ClassState>()(
         deleteClassCategory: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ClassesService.deleteClassCategory(id)
+            await classesService.deleteClassCategory(id)
             const state = get()
             const { categories } = state
             set({ 
@@ -389,7 +389,7 @@ export const useClassStore = create<ClassState>()(
         getSchedules: async (params?: ScheduleSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await ClassesService.getSchedules(params)
+            const response = await classesService.getSchedules(params)
             set({
               schedules: response.items,
               schedulePagination: {
@@ -411,7 +411,7 @@ export const useClassStore = create<ClassState>()(
         getSchedule: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const schedule = await ClassesService.getSchedule(id)
+            const schedule = await classesService.getSchedule(id)
             set({ currentSchedule: schedule, loading: false })
           } catch (error: any) {
             set({ 
@@ -424,7 +424,7 @@ export const useClassStore = create<ClassState>()(
         createSchedule: async (data: CreateScheduleRequest) => {
           set({ loading: true, error: null })
           try {
-            const newSchedule = await ClassesService.createSchedule(data)
+            const newSchedule = await classesService.createSchedule(data)
             const state = get()
             const { schedules } = state
             set({ 
@@ -444,7 +444,7 @@ export const useClassStore = create<ClassState>()(
         updateSchedule: async (id: number, data: UpdateScheduleRequest) => {
           set({ loading: true, error: null })
           try {
-            const updatedSchedule = await ClassesService.updateSchedule(id, data)
+            const updatedSchedule = await classesService.updateSchedule(id, data)
             const state = get()
             const { schedules, currentSchedule } = state
             set({ 
@@ -465,7 +465,7 @@ export const useClassStore = create<ClassState>()(
         deleteSchedule: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ClassesService.deleteSchedule(id)
+            await classesService.deleteSchedule(id)
             const state = get()
             const { schedules } = state
             set({ 
@@ -485,7 +485,7 @@ export const useClassStore = create<ClassState>()(
         cancelSchedule: async (id: number, data: { reason: string; notify_participants?: boolean }) => {
           set({ loading: true, error: null })
           try {
-            const updatedSchedule = await ClassesService.cancelSchedule(id, data)
+            const updatedSchedule = await classesService.cancelSchedule(id, data)
             const state = get()
             const { schedules, currentSchedule } = state
             set({ 
@@ -507,7 +507,7 @@ export const useClassStore = create<ClassState>()(
         getBookings: async (params?: BookingSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await ClassesService.getBookings(params)
+            const response = await classesService.getBookings(params)
             set({
               bookings: response.items,
               bookingPagination: {
@@ -529,7 +529,7 @@ export const useClassStore = create<ClassState>()(
         getBooking: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const booking = await ClassesService.getBooking(id)
+            const booking = await classesService.getBooking(id)
             set({ currentBooking: booking, loading: false })
           } catch (error: any) {
             set({ 
@@ -542,7 +542,7 @@ export const useClassStore = create<ClassState>()(
         createBooking: async (data: BookClassRequest) => {
           set({ loading: true, error: null })
           try {
-            const newBooking = await ClassesService.createBooking(data)
+            const newBooking = await classesService.createBooking(data)
             const state = get()
             const { bookings } = state
             set({ 
@@ -562,7 +562,7 @@ export const useClassStore = create<ClassState>()(
         cancelBooking: async (id: number, data?: { reason?: string; refund_requested?: boolean }) => {
           set({ loading: true, error: null })
           try {
-            const updatedBooking = await ClassesService.cancelBooking(id, data)
+            const updatedBooking = await classesService.cancelBooking(id, data)
             const state = get()
             const { bookings, currentBooking } = state
             set({ 
@@ -583,7 +583,7 @@ export const useClassStore = create<ClassState>()(
         checkInBooking: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedBooking = await ClassesService.checkInBooking(id)
+            const updatedBooking = await classesService.checkInBooking(id)
             const { bookings, currentBooking } = get()
             set({ 
               bookings: bookings.map(b => b.id === id ? updatedBooking : b),
@@ -603,7 +603,7 @@ export const useClassStore = create<ClassState>()(
         noShowBooking: async (id: number, reason?: string) => {
           set({ loading: true, error: null })
           try {
-            const updatedBooking = await ClassesService.noShowBooking(id, reason)
+            const updatedBooking = await classesService.noShowBooking(id, reason)
             const { bookings, currentBooking } = get()
             set({ 
               bookings: bookings.map(b => b.id === id ? updatedBooking : b),
@@ -624,7 +624,7 @@ export const useClassStore = create<ClassState>()(
         joinWaitlist: async (scheduleId: number, data?: any) => {
           set({ loading: true, error: null })
           try {
-            const waitlistEntry = await ClassesService.joinWaitlist(scheduleId, data)
+            const waitlistEntry = await classesService.joinWaitlist(scheduleId, data)
             const state = get()
             const { waitlist } = state
             set({ 
@@ -644,7 +644,7 @@ export const useClassStore = create<ClassState>()(
         leaveWaitlist: async (waitlistId: number) => {
           set({ loading: true, error: null })
           try {
-            await ClassesService.leaveWaitlist(waitlistId)
+            await classesService.leaveWaitlist(waitlistId)
             const state = get()
             const { waitlist } = state
             set({ 
@@ -664,7 +664,7 @@ export const useClassStore = create<ClassState>()(
         getWaitlist: async (scheduleId: number) => {
           set({ loading: true, error: null })
           try {
-            const waitlist = await ClassesService.getWaitlist(scheduleId)
+            const waitlist = await classesService.getWaitlist(scheduleId)
             set({ waitlist, loading: false })
           } catch (error: any) {
             set({ 
@@ -677,7 +677,7 @@ export const useClassStore = create<ClassState>()(
         processWaitlist: async (scheduleId: number, data: any) => {
           set({ loading: true, error: null })
           try {
-            const result = await ClassesService.processWaitlist(scheduleId, data)
+            const result = await classesService.processWaitlist(scheduleId, data)
             set({ loading: false })
             return result
           } catch (error: any) {
@@ -693,7 +693,7 @@ export const useClassStore = create<ClassState>()(
         markAttendance: async (scheduleId: number, data: any) => {
           set({ loading: true, error: null })
           try {
-            const attendance = await ClassesService.markAttendance(scheduleId, data)
+            const attendance = await classesService.markAttendance(scheduleId, data)
             set({ attendance, loading: false })
             return true
           } catch (error: any) {
@@ -708,7 +708,7 @@ export const useClassStore = create<ClassState>()(
         getAttendance: async (scheduleId: number) => {
           set({ loading: true, error: null })
           try {
-            const attendance = await ClassesService.getAttendance(scheduleId)
+            const attendance = await classesService.getAttendance(scheduleId)
             set({ attendance, loading: false })
           } catch (error: any) {
             set({ 
@@ -721,7 +721,7 @@ export const useClassStore = create<ClassState>()(
         updateAttendance: async (attendanceId: number, data: any) => {
           set({ loading: true, error: null })
           try {
-            const updatedAttendance = await ClassesService.updateAttendance(attendanceId, data)
+            const updatedAttendance = await classesService.updateAttendance(attendanceId, data)
             const { attendance } = get()
             set({ 
               attendance: attendance.map(a => a.id === attendanceId ? updatedAttendance : a),
@@ -741,7 +741,7 @@ export const useClassStore = create<ClassState>()(
         rateClass: async (scheduleId: number, data: any) => {
           set({ loading: true, error: null })
           try {
-            const rating = await ClassesService.rateClass(scheduleId, data)
+            const rating = await classesService.rateClass(scheduleId, data)
             const { ratings } = get()
             set({ 
               ratings: [rating, ...ratings],
@@ -760,7 +760,7 @@ export const useClassStore = create<ClassState>()(
         getClassRatings: async (classId: number, params?: any) => {
           set({ loading: true, error: null })
           try {
-            const response = await ClassesService.getClassRatings(classId, params)
+            const response = await classesService.getClassRatings(classId, params)
             set({ ratings: response.items, loading: false })
           } catch (error: any) {
             set({ 
@@ -773,7 +773,7 @@ export const useClassStore = create<ClassState>()(
         updateRating: async (ratingId: number, data: any) => {
           set({ loading: true, error: null })
           try {
-            const updatedRating = await ClassesService.updateRating(ratingId, data)
+            const updatedRating = await classesService.updateRating(ratingId, data)
             const { ratings } = get()
             set({ 
               ratings: ratings.map(r => r.id === ratingId ? updatedRating : r),
@@ -792,7 +792,7 @@ export const useClassStore = create<ClassState>()(
         deleteRating: async (ratingId: number) => {
           set({ loading: true, error: null })
           try {
-            await ClassesService.deleteRating(ratingId)
+            await classesService.deleteRating(ratingId)
             const { ratings } = get()
             set({ 
               ratings: ratings.filter(r => r.id !== ratingId),
@@ -812,7 +812,7 @@ export const useClassStore = create<ClassState>()(
         getClassPackages: async () => {
           set({ loading: true, error: null })
           try {
-            const packages = await ClassesService.getClassPackages()
+            const packages = await classesService.getClassPackages()
             set({ packages, loading: false })
           } catch (error: any) {
             set({ 
@@ -825,7 +825,7 @@ export const useClassStore = create<ClassState>()(
         createClassPackage: async (data: any) => {
           set({ loading: true, error: null })
           try {
-            const newPackage = await ClassesService.createClassPackage(data)
+            const newPackage = await classesService.createClassPackage(data)
             const { packages } = get()
             set({ 
               packages: [newPackage, ...packages],
@@ -844,7 +844,7 @@ export const useClassStore = create<ClassState>()(
         updateClassPackage: async (id: number, data: any) => {
           set({ loading: true, error: null })
           try {
-            const updatedPackage = await ClassesService.updateClassPackage(id, data)
+            const updatedPackage = await classesService.updateClassPackage(id, data)
             const { packages } = get()
             set({ 
               packages: packages.map(p => p.id === id ? updatedPackage : p),
@@ -863,7 +863,7 @@ export const useClassStore = create<ClassState>()(
         deleteClassPackage: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ClassesService.deleteClassPackage(id)
+            await classesService.deleteClassPackage(id)
             const { packages } = get()
             set({ 
               packages: packages.filter(p => p.id !== id),
@@ -882,7 +882,7 @@ export const useClassStore = create<ClassState>()(
         getUserClassPackages: async (userId: number) => {
           set({ loading: true, error: null })
           try {
-            const userPackages = await ClassesService.getUserClassPackages(userId)
+            const userPackages = await classesService.getUserClassPackages(userId)
             set({ userPackages, loading: false })
           } catch (error: any) {
             set({ 
@@ -895,7 +895,7 @@ export const useClassStore = create<ClassState>()(
         purchaseClassPackage: async (data: any) => {
           set({ loading: true, error: null })
           try {
-            const userPackage = await ClassesService.purchaseClassPackage(data)
+            const userPackage = await classesService.purchaseClassPackage(data)
             const { userPackages } = get()
             set({ 
               userPackages: [userPackage, ...userPackages],
@@ -915,7 +915,7 @@ export const useClassStore = create<ClassState>()(
         getClassStatistics: async () => {
           set({ loading: true, error: null })
           try {
-            const classStats = await ClassesService.getClassStatistics()
+            const classStats = await classesService.getClassStatistics()
             set({ classStats, loading: false })
           } catch (error: any) {
             set({ 
@@ -928,7 +928,7 @@ export const useClassStore = create<ClassState>()(
         getClassUsageStats: async (classId: number) => {
           set({ loading: true, error: null })
           try {
-            const stats = await ClassesService.getClassUsageStats(classId)
+            const stats = await classesService.getClassUsageStats(classId)
             set({ loading: false })
             return stats
           } catch (error: any) {
@@ -943,7 +943,7 @@ export const useClassStore = create<ClassState>()(
         getInstructorStats: async (instructorId: number) => {
           set({ loading: true, error: null })
           try {
-            const stats = await ClassesService.getInstructorStats(instructorId)
+            const stats = await classesService.getInstructorStats(instructorId)
             set({ loading: false })
             return stats
           } catch (error: any) {

@@ -55,6 +55,7 @@ export function ConfigurationPage() {
   // Local state for form data
   const [localSystemConfig, setLocalSystemConfig] = useState<any>(null)
   const [localBrandConfig, setLocalBrandConfig] = useState<any>(null)
+  const [localNotificationConfig, setLocalNotificationConfig] = useState<any>(null)
   
   // Update local state when store data changes
   useEffect(() => {
@@ -68,6 +69,12 @@ export function ConfigurationPage() {
       setLocalBrandConfig(brandConfig)
     }
   }, [brandConfig])
+  
+  useEffect(() => {
+    if (notificationConfig) {
+      setLocalNotificationConfig(notificationConfig)
+    }
+  }, [notificationConfig])
   
   const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'security' | 'payments' | 'integrations'>('general')
   const [showSecrets, setShowSecrets] = useState<{ [key: string]: boolean }>({})
@@ -87,8 +94,8 @@ export function ConfigurationPage() {
         if (localBrandConfig) {
           await updateBrandConfig(localBrandConfig)
         }
-      } else if (activeTab === 'notifications' && notificationConfig) {
-        await updateNotificationConfig(notificationConfig)
+      } else if (activeTab === 'notifications' && localNotificationConfig) {
+        await updateNotificationConfig(localNotificationConfig)
       }
       // Add other tabs as needed
       setHasChanges(false)
@@ -422,10 +429,11 @@ export function ConfigurationPage() {
                       Zona Horaria
                     </label>
                     <select
-                      value={systemConfig?.timezone || 'America/Argentina/Buenos_Aires'}
-                      onChange={() => {
-                            setHasChanges(true)
-                          }}
+                      value={localSystemConfig?.timezone || 'America/Argentina/Buenos_Aires'}
+                      onChange={(e) => {
+                        setLocalSystemConfig((prev: any) => ({ ...prev, timezone: e.target.value }))
+                        setHasChanges(true)
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       {timezones.map(tz => (
@@ -438,8 +446,9 @@ export function ConfigurationPage() {
                       Moneda
                     </label>
                     <select
-                      value={systemConfig?.currency || 'ARS'}
-                      onChange={() => {
+                      value={localSystemConfig?.currency || 'ARS'}
+                      onChange={(e) => {
+                        setLocalSystemConfig((prev: any) => ({ ...prev, currency: e.target.value }))
                         setHasChanges(true)
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -454,8 +463,9 @@ export function ConfigurationPage() {
                       Idioma
                     </label>
                     <select
-                      value={systemConfig?.language || 'es'}
-                      onChange={() => {
+                      value={localSystemConfig?.language || 'es'}
+                      onChange={(e) => {
+                        setLocalSystemConfig((prev: any) => ({ ...prev, language: e.target.value }))
                         setHasChanges(true)
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -473,7 +483,7 @@ export function ConfigurationPage() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Horarios de Funcionamiento</h3>
                 <div className="space-y-4">
                   {['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].map((day) => {
-                    const hours = systemConfig?.businessHours?.[day as keyof typeof systemConfig.businessHours] || { isOpen: true, openTime: '06:00', closeTime: '22:00' }
+                    const hours = localSystemConfig?.businessHours?.[day as keyof typeof localSystemConfig.businessHours] || { isOpen: true, openTime: '06:00', closeTime: '22:00' }
                     return (
                       <div key={day} className="flex items-center space-x-4">
                         <div className="w-24">
@@ -483,7 +493,14 @@ export function ConfigurationPage() {
                           <input
                             type="checkbox"
                             checked={hours.isOpen}
-                            onChange={() => {
+                            onChange={(e) => {
+                              setLocalSystemConfig((prev: any) => ({
+                                ...prev,
+                                businessHours: {
+                                  ...prev?.businessHours,
+                                  [day]: { ...hours, isOpen: e.target.checked }
+                                }
+                              }))
                               setHasChanges(true)
                             }}
                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -495,7 +512,14 @@ export function ConfigurationPage() {
                             <input
                               type="time"
                               value={hours.openTime || '06:00'}
-                              onChange={() => {
+                              onChange={(e) => {
+                                setLocalSystemConfig((prev: any) => ({
+                                  ...prev,
+                                  businessHours: {
+                                    ...prev?.businessHours,
+                                    [day]: { ...hours, openTime: e.target.value }
+                                  }
+                                }))
                                 setHasChanges(true)
                               }}
                               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -504,7 +528,14 @@ export function ConfigurationPage() {
                             <input
                               type="time"
                               value={hours.closeTime || '22:00'}
-                              onChange={() => {
+                              onChange={(e) => {
+                                setLocalSystemConfig((prev: any) => ({
+                                  ...prev,
+                                  businessHours: {
+                                    ...prev?.businessHours,
+                                    [day]: { ...hours, closeTime: e.target.value }
+                                  }
+                                }))
                                 setHasChanges(true)
                               }}
                               className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -537,7 +568,7 @@ export function ConfigurationPage() {
                     { key: 'membershipExpiry', label: 'Vencimiento de Membresías' },
                     { key: 'newMemberWelcome', label: 'Bienvenida a Nuevos Miembros' }
                   ].map(({ key, label }) => {
-                    const value = notificationConfig?.[key as keyof typeof notificationConfig] || false
+                    const value = localNotificationConfig?.[key as keyof typeof localNotificationConfig] || false
                     
                     return (
                       <div key={key} className="flex items-center justify-between py-3 border-b border-gray-200 last:border-b-0">
@@ -548,7 +579,8 @@ export function ConfigurationPage() {
                           <input
                             type="checkbox"
                             checked={Boolean(value)}
-                            onChange={() => {
+                            onChange={(e) => {
+                              setLocalNotificationConfig((prev: any) => ({ ...prev, [key]: e.target.checked }))
                               setHasChanges(true)
                             }}
                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -573,8 +605,12 @@ export function ConfigurationPage() {
                     </label>
                     <input
                       type="number"
-                      value={90}
-                      onChange={() => {
+                      value={localSystemConfig?.security?.passwordExpirationDays || 90}
+                      onChange={(e) => {
+                        setLocalSystemConfig((prev: any) => ({
+                          ...prev,
+                          security: { ...prev?.security, passwordExpirationDays: parseInt(e.target.value) }
+                        }))
                         setHasChanges(true)
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -586,8 +622,12 @@ export function ConfigurationPage() {
                     </label>
                     <input
                       type="number"
-                      value={5}
-                      onChange={() => {
+                      value={localSystemConfig?.security?.maxLoginAttempts || 5}
+                      onChange={(e) => {
+                        setLocalSystemConfig((prev: any) => ({
+                          ...prev,
+                          security: { ...prev?.security, maxLoginAttempts: parseInt(e.target.value) }
+                        }))
                         setHasChanges(true)
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -599,8 +639,12 @@ export function ConfigurationPage() {
                     </label>
                     <input
                       type="number"
-                      value={30}
-                      onChange={() => {
+                      value={localSystemConfig?.security?.sessionTimeout || 30}
+                      onChange={(e) => {
+                        setLocalSystemConfig((prev: any) => ({
+                          ...prev,
+                          security: { ...prev?.security, sessionTimeout: parseInt(e.target.value) }
+                        }))
                         setHasChanges(true)
                       }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -621,8 +665,12 @@ export function ConfigurationPage() {
                       <div className="flex items-center">
                         <input
                           type="checkbox"
-                          checked={Boolean(systemConfig?.[key as keyof typeof systemConfig])}
-                          onChange={() => {
+                          checked={Boolean(localSystemConfig?.security?.[key as keyof typeof localSystemConfig.security])}
+                          onChange={(e) => {
+                            setLocalSystemConfig((prev: any) => ({
+                              ...prev,
+                              security: { ...prev?.security, [key]: e.target.checked }
+                            }))
                             setHasChanges(true)
                           }}
                           className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -646,14 +694,24 @@ export function ConfigurationPage() {
                       <h4 className="text-md font-medium text-gray-900">Stripe</h4>
                       <input
                         type="checkbox"
-                        checked={systemConfig?.integrations?.paymentGateway?.provider === 'stripe' || false}
-                        onChange={() => {
+                        checked={localSystemConfig?.integrations?.paymentGateway?.provider === 'stripe' || false}
+                        onChange={(e) => {
+                          setLocalSystemConfig((prev: any) => ({
+                            ...prev,
+                            integrations: {
+                              ...prev?.integrations,
+                              paymentGateway: {
+                                ...prev?.integrations?.paymentGateway,
+                                provider: e.target.checked ? 'stripe' : null
+                              }
+                            }
+                          }))
                           setHasChanges(true)
                         }}
                         className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       />
                     </div>
-                    {systemConfig?.integrations?.paymentGateway?.provider === 'stripe' && (
+                    {localSystemConfig?.integrations?.paymentGateway?.provider === 'stripe' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -661,8 +719,18 @@ export function ConfigurationPage() {
                           </label>
                           <input
                             type="text"
-                            value={systemConfig?.integrations?.paymentGateway?.publicKey || ''}
-                            onChange={() => {
+                            value={localSystemConfig?.integrations?.paymentGateway?.publicKey || ''}
+                            onChange={(e) => {
+                              setLocalSystemConfig((prev: any) => ({
+                                ...prev,
+                                integrations: {
+                                  ...prev?.integrations,
+                                  paymentGateway: {
+                                    ...prev?.integrations?.paymentGateway,
+                                    publicKey: e.target.value
+                                  }
+                                }
+                              }))
                               setHasChanges(true)
                             }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -675,8 +743,18 @@ export function ConfigurationPage() {
                           <div className="relative">
                             <input
                               type={showSecrets['stripe_secret'] ? 'text' : 'password'}
-                              value={maskSecret(systemConfig?.integrations?.paymentGateway?.publicKey || '', showSecrets['stripe_secret'])}
-                              onChange={() => {
+                              value={maskSecret(localSystemConfig?.integrations?.paymentGateway?.secretKey || '', showSecrets['stripe_secret'])}
+                              onChange={(e) => {
+                                setLocalSystemConfig((prev: any) => ({
+                                  ...prev,
+                                  integrations: {
+                                    ...prev?.integrations,
+                                    paymentGateway: {
+                                      ...prev?.integrations?.paymentGateway,
+                                      secretKey: e.target.value
+                                    }
+                                  }
+                                }))
                                 setHasChanges(true)
                               }}
                               className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -704,14 +782,24 @@ export function ConfigurationPage() {
                       <h4 className="text-md font-medium text-gray-900">MercadoPago</h4>
                       <input
                         type="checkbox"
-                        checked={systemConfig?.integrations?.paymentGateway?.provider === 'paypal' || false}
-                        onChange={() => {
+                        checked={localSystemConfig?.integrations?.paymentGateway?.provider === 'mercadopago' || false}
+                        onChange={(e) => {
+                          setLocalSystemConfig((prev: any) => ({
+                            ...prev,
+                            integrations: {
+                              ...prev?.integrations,
+                              paymentGateway: {
+                                ...prev?.integrations?.paymentGateway,
+                                provider: e.target.checked ? 'mercadopago' : (prev?.integrations?.paymentGateway?.provider === 'mercadopago' ? null : prev?.integrations?.paymentGateway?.provider)
+                              }
+                            }
+                          }))
                           setHasChanges(true)
                         }}
                         className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       />
                     </div>
-                    {systemConfig?.integrations?.paymentGateway?.provider === 'paypal' && (
+                    {localSystemConfig?.integrations?.paymentGateway?.provider === 'mercadopago' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -719,8 +807,18 @@ export function ConfigurationPage() {
                           </label>
                           <input
                             type="text"
-                            value={systemConfig?.integrations?.paymentGateway?.publicKey || ''}
-                            onChange={() => {
+                            value={localSystemConfig?.integrations?.paymentGateway?.mercadopagoPublicKey || ''}
+                            onChange={(e) => {
+                              setLocalSystemConfig((prev: any) => ({
+                                ...prev,
+                                integrations: {
+                                  ...prev?.integrations,
+                                  paymentGateway: {
+                                    ...prev?.integrations?.paymentGateway,
+                                    mercadopagoPublicKey: e.target.value
+                                  }
+                                }
+                              }))
                               setHasChanges(true)
                             }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -733,8 +831,18 @@ export function ConfigurationPage() {
                           <div className="relative">
                             <input
                               type={showSecrets['mp_token'] ? 'text' : 'password'}
-                              value={maskSecret(systemConfig?.integrations?.paymentGateway?.publicKey || '', showSecrets['mp_token'])}
-                              onChange={() => {
+                              value={maskSecret(localSystemConfig?.integrations?.paymentGateway?.mercadopagoAccessToken || '', showSecrets['mp_token'])}
+                              onChange={(e) => {
+                                setLocalSystemConfig((prev: any) => ({
+                                  ...prev,
+                                  integrations: {
+                                    ...prev?.integrations,
+                                    paymentGateway: {
+                                      ...prev?.integrations?.paymentGateway,
+                                      mercadopagoAccessToken: e.target.value
+                                    }
+                                  }
+                                }))
                                 setHasChanges(true)
                               }}
                               className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -769,8 +877,12 @@ export function ConfigurationPage() {
                         <div className="flex items-center">
                           <input
                             type="checkbox"
-                            checked={Boolean(systemConfig?.[key as keyof typeof systemConfig])}
-                            onChange={() => {
+                            checked={Boolean(localSystemConfig?.paymentMethods?.[key as keyof typeof localSystemConfig.paymentMethods])}
+                            onChange={(e) => {
+                              setLocalSystemConfig((prev: any) => ({
+                                ...prev,
+                                paymentMethods: { ...prev?.paymentMethods, [key]: e.target.checked }
+                              }))
                               setHasChanges(true)
                             }}
                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -788,8 +900,12 @@ export function ConfigurationPage() {
                       </label>
                       <input
                         type="number"
-                        value={0}
-                        onChange={() => {
+                        value={localSystemConfig?.paymentPolicies?.latePaymentFee || 0}
+                        onChange={(e) => {
+                          setLocalSystemConfig((prev: any) => ({
+                            ...prev,
+                            paymentPolicies: { ...prev?.paymentPolicies, latePaymentFee: parseFloat(e.target.value) }
+                          }))
                           setHasChanges(true)
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -801,8 +917,12 @@ export function ConfigurationPage() {
                       </label>
                       <input
                         type="number"
-                        value={0}
-                        onChange={() => {
+                        value={localSystemConfig?.paymentPolicies?.gracePeriodDays || 0}
+                        onChange={(e) => {
+                          setLocalSystemConfig((prev: any) => ({
+                            ...prev,
+                            paymentPolicies: { ...prev?.paymentPolicies, gracePeriodDays: parseInt(e.target.value) }
+                          }))
                           setHasChanges(true)
                         }}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -828,14 +948,21 @@ export function ConfigurationPage() {
                       </div>
                       <input
                         type="checkbox"
-                        checked={systemConfig?.integrations?.socialMedia?.facebook ? true : false}
-                        onChange={() => {
+                        checked={localSystemConfig?.integrations?.whatsapp?.enabled || false}
+                        onChange={(e) => {
+                          setLocalSystemConfig((prev: any) => ({
+                            ...prev,
+                            integrations: {
+                              ...prev?.integrations,
+                              whatsapp: { ...prev?.integrations?.whatsapp, enabled: e.target.checked }
+                            }
+                          }))
                           setHasChanges(true)
                         }}
                         className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                       />
                     </div>
-                    {systemConfig?.integrations?.socialMedia?.facebook && (
+                    {localSystemConfig?.integrations?.whatsapp?.enabled && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -843,8 +970,15 @@ export function ConfigurationPage() {
                           </label>
                           <input
                             type="text"
-                            value={systemConfig?.integrations?.smsService?.fromNumber || ''}
-                            onChange={() => {
+                            value={localSystemConfig?.integrations?.whatsapp?.apiToken || ''}
+                            onChange={(e) => {
+                              setLocalSystemConfig((prev: any) => ({
+                                ...prev,
+                                integrations: {
+                                  ...prev?.integrations,
+                                  whatsapp: { ...prev?.integrations?.whatsapp, apiToken: e.target.value }
+                                }
+                              }))
                               setHasChanges(true)
                             }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -856,8 +990,15 @@ export function ConfigurationPage() {
                           </label>
                           <input
                             type="tel"
-                            value={systemConfig?.phone || ''}
-                            onChange={() => {
+                            value={localSystemConfig?.integrations?.whatsapp?.phoneNumber || ''}
+                            onChange={(e) => {
+                              setLocalSystemConfig((prev: any) => ({
+                                ...prev,
+                                integrations: {
+                                  ...prev?.integrations,
+                                  whatsapp: { ...prev?.integrations?.whatsapp, phoneNumber: e.target.value }
+                                }
+                              }))
                               setHasChanges(true)
                             }}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"

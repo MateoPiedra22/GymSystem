@@ -33,7 +33,8 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true,
+    sourcemap: process.env.NODE_ENV === 'development',
+    minify: 'terser',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -41,9 +42,11 @@ export default defineConfig({
           router: ['react-router-dom'],
           ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu'],
           charts: ['recharts'],
+          utils: ['axios', 'zustand', 'zod'],
         },
       },
     },
+    chunkSizeWarningLimit: 1000,
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],

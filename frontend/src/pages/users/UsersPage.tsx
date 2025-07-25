@@ -34,7 +34,6 @@ import {
   UserX,
   TrendingUp,
   BarChart3,
-  Target,
   Upload,
   MessageSquare,
   Zap,
@@ -65,72 +64,69 @@ const membershipTypes = ['Todos', 'Mensual', 'Estudiante', 'Funcional', 'Semanal
 const statusOptions = ['Todos', 'active', 'inactive', 'suspended']
 const roleOptions = ['Todos', 'admin', 'owner', 'trainer', 'member']
 
-// Mock data for analytics
-const membershipGrowthData = [
-  { month: 'Ene', nuevos: 15, cancelados: 3, total: 120 },
-  { month: 'Feb', nuevos: 22, cancelados: 5, total: 137 },
-  { month: 'Mar', nuevos: 18, cancelados: 2, total: 153 },
-  { month: 'Abr', nuevos: 25, cancelados: 4, total: 174 },
-  { month: 'May', nuevos: 20, cancelados: 6, total: 188 },
-  { month: 'Jun', nuevos: 28, cancelados: 3, total: 213 }
-]
-
-const membershipTypeDistribution = [
-  { name: 'Mensual', value: 45, color: '#3B82F6' },
-  { name: 'Estudiante', value: 25, color: '#10B981' },
-  { name: 'Funcional', value: 15, color: '#F59E0B' },
-  { name: 'Semanal', value: 10, color: '#EF4444' },
-  { name: 'Diaria', value: 5, color: '#8B5CF6' }
-]
-
-const attendanceData = [
-  { day: 'Lun', checkins: 45, checkouts: 42 },
-  { day: 'Mar', checkins: 52, checkouts: 48 },
-  { day: 'Mié', checkins: 38, checkouts: 35 },
-  { day: 'Jue', checkins: 48, checkouts: 45 },
-  { day: 'Vie', checkins: 55, checkouts: 52 },
-  { day: 'Sáb', checkins: 35, checkouts: 33 },
-  { day: 'Dom', checkins: 25, checkouts: 22 }
-]
-
-const quickStats = [
-  {
-    title: 'Total Miembros',
-    value: '213',
-    change: '+12.5%',
-    trend: 'up',
-    icon: Users,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50'
-  },
-  {
-    title: 'Nuevos Este Mes',
-    value: '28',
-    change: '+15.8%',
-    trend: 'up',
-    icon: UserPlus,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50'
-  },
-  {
-    title: 'Check-ins Hoy',
-    value: '87',
-    change: '+8.2%',
-    trend: 'up',
-    icon: UserCheck,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50'
-  },
-  {
-    title: 'Tasa Retención',
-    value: '94.2%',
-    change: '+2.1%',
-    trend: 'up',
-    icon: Target,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50'
+// Analytics data will be fetched from backend
+const getAnalyticsData = async () => {
+  // This will be replaced with actual API calls
+  return {
+    membershipGrowthData: [
+      { month: 'Ene', nuevos: 25, cancelados: 5 },
+      { month: 'Feb', nuevos: 30, cancelados: 8 },
+      { month: 'Mar', nuevos: 28, cancelados: 6 },
+      { month: 'Abr', nuevos: 35, cancelados: 10 },
+      { month: 'May', nuevos: 32, cancelados: 7 },
+      { month: 'Jun', nuevos: 40, cancelados: 12 }
+    ],
+    membershipTypeDistribution: [
+      { name: 'Mensual', value: 45, color: '#3B82F6' },
+      { name: 'Estudiante', value: 25, color: '#10B981' },
+      { name: 'Funcional', value: 20, color: '#F59E0B' },
+      { name: 'Semanal', value: 10, color: '#EF4444' }
+    ],
+    attendanceData: [
+      { day: 'Lun', checkins: 85, checkouts: 82 },
+      { day: 'Mar', checkins: 92, checkouts: 89 },
+      { day: 'Mié', checkins: 78, checkouts: 75 },
+      { day: 'Jue', checkins: 88, checkouts: 85 },
+      { day: 'Vie', checkins: 95, checkouts: 92 },
+      { day: 'Sáb', checkins: 72, checkouts: 70 },
+      { day: 'Dom', checkins: 65, checkouts: 63 }
+    ],
+    quickStats: [
+      {
+        title: 'Total Miembros',
+        value: '1,234',
+        change: '+12%',
+        icon: Users,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100'
+      },
+      {
+        title: 'Miembros Activos',
+        value: '1,156',
+        change: '+8%',
+        icon: UserCheck,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100'
+      },
+      {
+        title: 'Check-ins Hoy',
+        value: '89',
+        change: '+15%',
+        icon: Calendar,
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-100'
+      },
+      {
+        title: 'Ingresos Mes',
+        value: '$12,450',
+        change: '+22%',
+        icon: DollarSign,
+        color: 'text-yellow-600',
+        bgColor: 'bg-yellow-100'
+      }
+    ]
   }
-]
+}
 
 export function UsersPage() {
   const { 
@@ -145,6 +141,7 @@ export function UsersPage() {
   } = useUserStore()
   
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([])
+  const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedMembershipType, setSelectedMembershipType] = useState('Todos')
   const [selectedStatus, setSelectedStatus] = useState('Todos')
@@ -158,9 +155,10 @@ export function UsersPage() {
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null)
   const [showBulkActionsDialog, setShowBulkActionsDialog] = useState(false)
 
-  // Load users on component mount
+  // Load users and analytics on component mount
   useEffect(() => {
     getUsers({ page: 1, limit: usersPerPage })
+    getAnalyticsData().then(setAnalyticsData)
   }, [])
 
   // Filter users based on search and filters
@@ -428,7 +426,7 @@ export function UsersPage() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {quickStats.map((stat, index) => {
+        {analyticsData?.quickStats?.map((stat: any, index: number) => {
           const Icon = stat.icon
           return (
             <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
@@ -778,7 +776,7 @@ export function UsersPage() {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={membershipGrowthData}>
+                  <AreaChart data={analyticsData?.membershipGrowthData || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
@@ -801,7 +799,7 @@ export function UsersPage() {
                 <ResponsiveContainer width="100%" height={300}>
                   <RechartsPieChart>
                     <Pie
-                      data={membershipTypeDistribution}
+                      data={analyticsData?.membershipTypeDistribution || []}
                       cx="50%"
                       cy="50%"
                       outerRadius={80}
@@ -809,7 +807,7 @@ export function UsersPage() {
                       dataKey="value"
                       label={({ name, value }) => `${name}: ${value}%`}
                     >
-                      {membershipTypeDistribution.map((entry, index) => (
+                      {(analyticsData?.membershipTypeDistribution || []).map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -830,7 +828,7 @@ export function UsersPage() {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={attendanceData}>
+                <BarChart data={analyticsData?.attendanceData || []}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="day" />
                   <YAxis />

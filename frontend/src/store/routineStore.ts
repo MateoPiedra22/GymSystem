@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { RoutinesService } from '../api/services/routines'
+import { routinesService, RoutinesService } from '../api/services/routines'
 import {
   Routine,
   RoutineCategory,
@@ -13,6 +13,7 @@ import {
   RoutineProgress,
   RoutineStatistics
 } from '../types/routine'
+import { PaginationParams } from '../types/common'
 
 interface RoutineState {
   // State
@@ -22,6 +23,7 @@ interface RoutineState {
   sessions: RoutineSession[]
   currentRoutine: Routine | null
   currentUserRoutine: UserRoutine | null
+  selectedUserRoutine: UserRoutine | null
   currentSession: RoutineSession | null
   routineProgress: RoutineProgress | null
   routineStats: RoutineStatistics | null
@@ -30,6 +32,7 @@ interface RoutineState {
   error: string | null
   currentPage: number
   totalPages: number
+  total: number
   pagination: {
     page: number
     limit: number
@@ -67,11 +70,11 @@ interface RoutineState {
   deleteCategory: (id: number) => Promise<boolean>
   
   // User Routines
-  getUserRoutines: (params?: any) => Promise<void>
-  getUserRoutine: (id: number) => Promise<void>
-  assignRoutine: (data: AssignRoutineRequest) => Promise<UserRoutine | null>
-  unassignRoutine: (userRoutineId: number) => Promise<boolean>
-  updateUserRoutine: (id: number, data: any) => Promise<UserRoutine | null>
+  getUserRoutines: (params?: any) => Promise<any>
+  getUserRoutine: (id: number) => Promise<any>
+  assignRoutine: (data: AssignRoutineRequest) => Promise<UserRoutine>
+  unassignRoutine: (userRoutineId: number) => Promise<void>
+  updateUserRoutine: (id: number, data: any) => Promise<UserRoutine>
   pauseUserRoutine: (id: number, reason?: string) => Promise<boolean>
   resumeUserRoutine: (id: number) => Promise<boolean>
   completeUserRoutine: (id: number, data?: any) => Promise<boolean>
@@ -118,6 +121,7 @@ export const useRoutineStore = create<RoutineState>()(
         sessions: [],
         currentRoutine: null,
         currentUserRoutine: null,
+        selectedUserRoutine: null,
         currentSession: null,
         routineProgress: null,
         routineStats: null,
@@ -126,6 +130,7 @@ export const useRoutineStore = create<RoutineState>()(
         error: null,
         currentPage: 1,
         totalPages: 0,
+        total: 0,
         pagination: {
           page: 1,
           limit: 10,
@@ -150,7 +155,7 @@ export const useRoutineStore = create<RoutineState>()(
         getRoutines: async (params?: RoutineSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await RoutinesService.getRoutines(params)
+            const response = await routinesService.getRoutines(params)
             set({
               routines: response.items,
               pagination: {
@@ -172,7 +177,7 @@ export const useRoutineStore = create<RoutineState>()(
         getRoutine: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const routine = await RoutinesService.getRoutine(id)
+            const routine = await routinesService.getRoutine(id)
             set({ currentRoutine: routine, loading: false })
           } catch (error: any) {
             set({ 
@@ -185,7 +190,7 @@ export const useRoutineStore = create<RoutineState>()(
         searchRoutines: async (params: RoutineSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await RoutinesService.getRoutines(params)
+            const response = await routinesService.getRoutines(params)
             set({
               routines: response.items,
               pagination: {
@@ -207,7 +212,7 @@ export const useRoutineStore = create<RoutineState>()(
         createRoutine: async (routineData: CreateRoutineRequest) => {
           set({ loading: true, error: null })
           try {
-            const newRoutine = await RoutinesService.createRoutine(routineData)
+            const newRoutine = await routinesService.createRoutine(routineData)
             const { routines } = get()
             set({ 
               routines: [newRoutine, ...routines],
@@ -226,7 +231,7 @@ export const useRoutineStore = create<RoutineState>()(
         updateRoutine: async (id: number, routineData: UpdateRoutineRequest) => {
           set({ loading: true, error: null })
           try {
-            const updatedRoutine = await RoutinesService.updateRoutine(id, routineData)
+            const updatedRoutine = await routinesService.updateRoutine(id, routineData)
             const { routines, currentRoutine } = get()
             set({ 
               routines: routines.map(routine => routine.id === id ? updatedRoutine : routine),
@@ -246,7 +251,7 @@ export const useRoutineStore = create<RoutineState>()(
         deleteRoutine: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await RoutinesService.deleteRoutine(id)
+            await routinesService.deleteRoutine(id)
             const { routines } = get()
             set({ 
               routines: routines.filter(routine => routine.id !== id),
@@ -265,7 +270,7 @@ export const useRoutineStore = create<RoutineState>()(
         toggleRoutineStatus: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedRoutine = await RoutinesService.toggleRoutineStatus(id)
+            const updatedRoutine = await routinesService.toggleRoutineStatus(id)
             const { routines } = get()
             set({ 
               routines: routines.map(routine => routine.id === id ? updatedRoutine : routine),
@@ -284,7 +289,7 @@ export const useRoutineStore = create<RoutineState>()(
         duplicateRoutine: async (id: number, data: { name: string; description?: string }) => {
           set({ loading: true, error: null })
           try {
-            const duplicatedRoutine = await RoutinesService.duplicateRoutine(id, data)
+            const duplicatedRoutine = await routinesService.duplicateRoutine(id, data)
             const { routines } = get()
             set({ 
               routines: [duplicatedRoutine, ...routines],
@@ -304,7 +309,7 @@ export const useRoutineStore = create<RoutineState>()(
         getCategories: async () => {
           set({ loading: true, error: null })
           try {
-            const categories = await RoutinesService.getRoutineCategories()
+            const categories = await routinesService.getRoutineCategories()
             set({ categories, loading: false })
           } catch (error: any) {
             set({ 
@@ -317,7 +322,7 @@ export const useRoutineStore = create<RoutineState>()(
         createCategory: async (data) => {
           set({ loading: true, error: null })
           try {
-            const newCategory = await RoutinesService.createRoutineCategory(data)
+            const newCategory = await routinesService.createRoutineCategory(data)
             const { categories } = get()
             set({ 
               categories: [newCategory, ...categories],
@@ -336,7 +341,7 @@ export const useRoutineStore = create<RoutineState>()(
         updateCategory: async (id: number, data) => {
           set({ loading: true, error: null })
           try {
-            const updatedCategory = await RoutinesService.updateRoutineCategory(id, data)
+            const updatedCategory = await routinesService.updateRoutineCategory(id, data)
             const { categories } = get()
             set({ 
               categories: categories.map(category => category.id === id ? updatedCategory : category),
@@ -355,7 +360,7 @@ export const useRoutineStore = create<RoutineState>()(
         deleteCategory: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await RoutinesService.deleteRoutineCategory(id)
+            await routinesService.deleteRoutineCategory(id)
             const { categories } = get()
             set({ 
               categories: categories.filter(category => category.id !== id),
@@ -372,103 +377,104 @@ export const useRoutineStore = create<RoutineState>()(
         },
 
         // User Routine Actions
-        getUserRoutines: async (params?) => {
-          set({ loading: true, error: null })
+        getUserRoutines: async (params?: {
+          user_id?: number
+          status?: string
+          category_id?: number
+          assigned_by?: number
+        } & PaginationParams) => {
           try {
+            set({ loading: true, error: null })
             const response = await RoutinesService.getUserRoutines(params)
-            set({ 
-              userRoutines: response.items,
-              userRoutinePagination: {
-                page: params?.page || 1,
-                limit: params?.limit || 10,
-                total: response.total,
-                totalPages: Math.ceil(response.total / (params?.limit || 10))
-              },
-              loading: false 
-            })
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Error al cargar rutinas de usuario',
-              loading: false 
-            })
+            set({ userRoutines: response.items, total: response.total })
+            return response
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error fetching user routines'
+            set({ error: errorMessage })
+            throw error
+          } finally {
+            set({ loading: false })
           }
         },
 
         getUserRoutine: async (id: number) => {
-          set({ loading: true, error: null })
           try {
+            set({ loading: true, error: null })
             const userRoutine = await RoutinesService.getUserRoutine(id)
-            set({ currentUserRoutine: userRoutine, loading: false })
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Error al cargar rutina de usuario',
-              loading: false 
-            })
+            set({ selectedUserRoutine: userRoutine })
+            return userRoutine
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error fetching user routine'
+            set({ error: errorMessage })
+            throw error
+          } finally {
+            set({ loading: false })
           }
         },
 
         assignRoutine: async (data: AssignRoutineRequest) => {
-          set({ loading: true, error: null })
           try {
+            set({ loading: true, error: null })
             const userRoutine = await RoutinesService.assignRoutine(data)
-            const { userRoutines } = get()
-            set({ 
-              userRoutines: [userRoutine, ...userRoutines],
-              loading: false 
-            })
+            set(state => ({
+              userRoutines: [...state.userRoutines, userRoutine]
+            }))
             return userRoutine
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Error al asignar rutina',
-              loading: false 
-            })
-            return null
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error assigning routine'
+            set({ error: errorMessage })
+            throw error
+          } finally {
+            set({ loading: false })
           }
         },
 
         unassignRoutine: async (userRoutineId: number) => {
-          set({ loading: true, error: null })
           try {
+            set({ loading: true, error: null })
             await RoutinesService.unassignRoutine(userRoutineId)
-            const { userRoutines } = get()
-            set({ 
-              userRoutines: userRoutines.filter(ur => ur.id !== userRoutineId),
-              loading: false 
-            })
-            return true
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Error al desasignar rutina',
-              loading: false 
-            })
-            return false
+            set(state => ({
+              userRoutines: state.userRoutines.filter(ur => ur.id !== userRoutineId)
+            }))
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error unassigning routine'
+            set({ error: errorMessage })
+            throw error
+          } finally {
+            set({ loading: false })
           }
         },
 
-        updateUserRoutine: async (id: number, data) => {
-          set({ loading: true, error: null })
+        updateUserRoutine: async (id: number, data: {
+          start_date?: string
+          end_date?: string
+          status?: 'active' | 'paused' | 'completed' | 'cancelled'
+          notes?: string
+          custom_schedule?: any
+        }) => {
           try {
+            set({ loading: true, error: null })
             const updatedUserRoutine = await RoutinesService.updateUserRoutine(id, data)
-            const { userRoutines, currentUserRoutine } = get()
-            set({ 
-              userRoutines: userRoutines.map(ur => ur.id === id ? updatedUserRoutine : ur),
-              currentUserRoutine: currentUserRoutine?.id === id ? updatedUserRoutine : currentUserRoutine,
-              loading: false 
-            })
+            set(state => ({
+              userRoutines: state.userRoutines.map(ur => 
+                ur.id === id ? updatedUserRoutine : ur
+              ),
+              selectedUserRoutine: state.selectedUserRoutine?.id === id ? updatedUserRoutine : state.selectedUserRoutine
+            }))
             return updatedUserRoutine
-          } catch (error: any) {
-            set({ 
-              error: error.message || 'Error al actualizar rutina de usuario',
-              loading: false 
-            })
-            return null
+          } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error updating user routine'
+            set({ error: errorMessage })
+            throw error
+          } finally {
+            set({ loading: false })
           }
         },
 
         pauseUserRoutine: async (id: number, reason?: string) => {
           set({ loading: true, error: null })
           try {
-            const updatedUserRoutine = await RoutinesService.pauseUserRoutine(id, reason)
+            const updatedUserRoutine = await routinesService.pauseUserRoutine(id, reason)
             const { userRoutines } = get()
             set({ 
               userRoutines: userRoutines.map(ur => ur.id === id ? updatedUserRoutine : ur),
@@ -487,7 +493,7 @@ export const useRoutineStore = create<RoutineState>()(
         resumeUserRoutine: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedUserRoutine = await RoutinesService.resumeUserRoutine(id)
+            const updatedUserRoutine = await routinesService.resumeUserRoutine(id)
             const { userRoutines } = get()
             set({ 
               userRoutines: userRoutines.map(ur => ur.id === id ? updatedUserRoutine : ur),
@@ -506,7 +512,7 @@ export const useRoutineStore = create<RoutineState>()(
         completeUserRoutine: async (id: number, data?) => {
           set({ loading: true, error: null })
           try {
-            const updatedUserRoutine = await RoutinesService.completeUserRoutine(id, data)
+            const updatedUserRoutine = await routinesService.completeUserRoutine(id, data)
             const { userRoutines } = get()
             set({ 
               userRoutines: userRoutines.map(ur => ur.id === id ? updatedUserRoutine : ur),
@@ -526,7 +532,7 @@ export const useRoutineStore = create<RoutineState>()(
         getRoutineSessions: async (params?) => {
           set({ loading: true, error: null })
           try {
-            const response = await RoutinesService.getRoutineSessions(params)
+            const response = await routinesService.getRoutineSessions(params)
             set({ 
               sessions: response.items,
               sessionPagination: {
@@ -548,7 +554,7 @@ export const useRoutineStore = create<RoutineState>()(
         getRoutineSession: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const session = await RoutinesService.getRoutineSession(id)
+            const session = await routinesService.getRoutineSession(id)
             set({ currentSession: session, loading: false })
           } catch (error: any) {
             set({ 
@@ -561,7 +567,7 @@ export const useRoutineStore = create<RoutineState>()(
         startRoutineSession: async (userRoutineId: number, data?) => {
           set({ loading: true, error: null })
           try {
-            const session = await RoutinesService.startRoutineSession(userRoutineId, data)
+            const session = await routinesService.startRoutineSession(userRoutineId, data)
             const { sessions } = get()
             set({ 
               sessions: [session, ...sessions],
@@ -581,7 +587,7 @@ export const useRoutineStore = create<RoutineState>()(
         updateRoutineSession: async (id: number, data) => {
           set({ loading: true, error: null })
           try {
-            const updatedSession = await RoutinesService.updateRoutineSession(id, data)
+            const updatedSession = await routinesService.updateRoutineSession(id, data)
             const { sessions, currentSession } = get()
             set({ 
               sessions: sessions.map(session => session.id === id ? updatedSession : session),
@@ -601,7 +607,7 @@ export const useRoutineStore = create<RoutineState>()(
         completeRoutineSession: async (id: number, data?) => {
           set({ loading: true, error: null })
           try {
-            const updatedSession = await RoutinesService.completeRoutineSession(id, data)
+            const updatedSession = await routinesService.completeRoutineSession(id, data)
             const { sessions } = get()
             set({ 
               sessions: sessions.map(session => session.id === id ? updatedSession : session),
@@ -620,7 +626,7 @@ export const useRoutineStore = create<RoutineState>()(
         cancelRoutineSession: async (id: number, reason?: string) => {
           set({ loading: true, error: null })
           try {
-            const updatedSession = await RoutinesService.cancelRoutineSession(id, reason)
+            const updatedSession = await routinesService.cancelRoutineSession(id, reason)
             const { sessions } = get()
             set({ 
               sessions: sessions.map(session => session.id === id ? updatedSession : session),
@@ -640,7 +646,7 @@ export const useRoutineStore = create<RoutineState>()(
         getRoutineProgress: async (userRoutineId: number) => {
           set({ loading: true, error: null })
           try {
-            const progress = await RoutinesService.getRoutineProgress(userRoutineId)
+            const progress = await routinesService.getRoutineProgress(userRoutineId)
             set({ routineProgress: progress, loading: false })
           } catch (error: any) {
             set({ 
@@ -653,7 +659,7 @@ export const useRoutineStore = create<RoutineState>()(
         getUserRoutineProgress: async (userId: number, params?) => {
           set({ loading: true, error: null })
           try {
-            await RoutinesService.getUserRoutineProgress(userId, params)
+            await routinesService.getUserRoutineProgress(userId, params)
             // Store multiple progress records if needed
             set({ loading: false })
           } catch (error: any) {
@@ -668,7 +674,7 @@ export const useRoutineStore = create<RoutineState>()(
         getRoutineStatistics: async () => {
           set({ loading: true, error: null })
           try {
-            const stats = await RoutinesService.getRoutineStatistics()
+            const stats = await routinesService.getRoutineStatistics()
             set({ routineStats: stats, loading: false })
           } catch (error: any) {
             set({ 

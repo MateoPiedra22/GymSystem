@@ -19,31 +19,31 @@ import {
 
 export class RoutinesService {
   // Routines
-  static async getRoutines(params?: RoutineSearchParams): Promise<RoutineListResponse> {
+  async getRoutines(params?: RoutineSearchParams): Promise<RoutineListResponse> {
     return apiClient.get(API_ENDPOINTS.ROUTINES.ROUTINES, { params })
   }
 
-  static async getRoutine(id: number): Promise<Routine> {
+  async getRoutine(id: number): Promise<Routine> {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/${id}`)
   }
 
-  static async createRoutine(data: CreateRoutineRequest): Promise<Routine> {
+  async createRoutine(data: CreateRoutineRequest): Promise<Routine> {
     return apiClient.post(API_ENDPOINTS.ROUTINES.ROUTINES, data)
   }
 
-  static async updateRoutine(id: number, data: UpdateRoutineRequest): Promise<Routine> {
+  async updateRoutine(id: number, data: UpdateRoutineRequest): Promise<Routine> {
     return apiClient.put(`${API_ENDPOINTS.ROUTINES.ROUTINES}/${id}`, data)
   }
 
-  static async deleteRoutine(id: number): Promise<void> {
+  async deleteRoutine(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.ROUTINES.ROUTINES}/${id}`)
   }
 
-  static async toggleRoutineStatus(id: number): Promise<Routine> {
+  async toggleRoutineStatus(id: number): Promise<Routine> {
     return apiClient.patch(`${API_ENDPOINTS.ROUTINES.ROUTINES}/${id}/toggle-status`)
   }
 
-  static async duplicateRoutine(id: number, data: {
+  async duplicateRoutine(id: number, data: {
     name: string
     description?: string
   }): Promise<Routine> {
@@ -51,11 +51,11 @@ export class RoutinesService {
   }
 
   // Routine Categories
-  static async getRoutineCategories(): Promise<RoutineCategory[]> {
+  async getRoutineCategories(): Promise<RoutineCategory[]> {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/categories`)
   }
 
-  static async createRoutineCategory(data: {
+  async createRoutineCategory(data: {
     name: string
     description: string
     icon?: string
@@ -64,7 +64,7 @@ export class RoutinesService {
     return apiClient.post(`${API_ENDPOINTS.ROUTINES.ROUTINES}/categories`, data)
   }
 
-  static async updateRoutineCategory(id: number, data: {
+  async updateRoutineCategory(id: number, data: {
     name?: string
     description?: string
     icon?: string
@@ -74,7 +74,7 @@ export class RoutinesService {
     return apiClient.put(`${API_ENDPOINTS.ROUTINES.ROUTINES}/categories/${id}`, data)
   }
 
-  static async deleteRoutineCategory(id: number): Promise<void> {
+  async deleteRoutineCategory(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.ROUTINES.ROUTINES}/categories/${id}`)
   }
 
@@ -110,15 +110,15 @@ export class RoutinesService {
     return apiClient.put(`${API_ENDPOINTS.ROUTINES.ROUTINES}/user-routines/${id}`, data)
   }
 
-  static async pauseUserRoutine(id: number, reason?: string): Promise<UserRoutine> {
+  async pauseUserRoutine(id: number, reason?: string): Promise<UserRoutine> {
     return apiClient.patch(`${API_ENDPOINTS.ROUTINES.ROUTINES}/user-routines/${id}/pause`, { reason })
   }
 
-  static async resumeUserRoutine(id: number): Promise<UserRoutine> {
+  async resumeUserRoutine(id: number): Promise<UserRoutine> {
     return apiClient.patch(`${API_ENDPOINTS.ROUTINES.ROUTINES}/user-routines/${id}/resume`)
   }
 
-  static async completeUserRoutine(id: number, data?: {
+  async completeUserRoutine(id: number, data?: {
     completion_notes?: string
     rating?: number
     feedback?: string
@@ -127,7 +127,7 @@ export class RoutinesService {
   }
 
   // Routine Sessions
-  static async getRoutineSessions(params?: {
+  async getRoutineSessions(params?: {
     user_routine_id?: number
     user_id?: number
     status?: string
@@ -137,18 +137,18 @@ export class RoutinesService {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/sessions`, { params })
   }
 
-  static async getRoutineSession(id: number): Promise<RoutineSession> {
+  async getRoutineSession(id: number): Promise<RoutineSession> {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/sessions/${id}`)
   }
 
-  static async startRoutineSession(userRoutineId: number, data?: {
+  async startRoutineSession(userRoutineId: number, data?: {
     scheduled_date?: string
     notes?: string
   }): Promise<RoutineSession> {
     return apiClient.post(`${API_ENDPOINTS.ROUTINES.ROUTINES}/user-routines/${userRoutineId}/start-session`, data)
   }
 
-  static async updateRoutineSession(id: number, data: {
+  async updateRoutineSession(id: number, data: {
     exercises?: Array<{
       exercise_id: number
       sets: Array<{
@@ -168,7 +168,7 @@ export class RoutinesService {
     return apiClient.put(`${API_ENDPOINTS.ROUTINES.ROUTINES}/sessions/${id}`, data)
   }
 
-  static async completeRoutineSession(id: number, data?: {
+  async completeRoutineSession(id: number, data?: {
     duration_minutes?: number
     calories_burned?: number
     difficulty_rating?: number
@@ -177,16 +177,16 @@ export class RoutinesService {
     return apiClient.patch(`${API_ENDPOINTS.ROUTINES.ROUTINES}/sessions/${id}/complete`, data)
   }
 
-  static async cancelRoutineSession(id: number, reason?: string): Promise<RoutineSession> {
+  async cancelRoutineSession(id: number, reason?: string): Promise<RoutineSession> {
     return apiClient.patch(`${API_ENDPOINTS.ROUTINES.ROUTINES}/sessions/${id}/cancel`, { reason })
   }
 
   // Routine Progress
-  static async getRoutineProgress(userRoutineId: number): Promise<RoutineProgress> {
+  async getRoutineProgress(userRoutineId: number): Promise<RoutineProgress> {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/user-routines/${userRoutineId}/progress`)
   }
 
-  static async getUserRoutineProgress(userId: number, params?: {
+  async getUserRoutineProgress(userId: number, params?: {
     routine_id?: number
     date_from?: string
     date_to?: string
@@ -195,11 +195,11 @@ export class RoutinesService {
   }
 
   // Routine Statistics
-  static async getRoutineStatistics(): Promise<RoutineStatistics> {
+  async getRoutineStatistics(): Promise<RoutineStatistics> {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/statistics`)
   }
 
-  static async getRoutineUsageStats(routineId: number): Promise<{
+  async getRoutineUsageStats(routineId: number): Promise<{
     total_assignments: number
     active_users: number
     completion_rate: number
@@ -214,7 +214,7 @@ export class RoutinesService {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/${routineId}/usage-stats`)
   }
 
-  static async getUserRoutineStats(userId: number): Promise<{
+  async getUserRoutineStats(userId: number): Promise<{
     total_routines: number
     active_routines: number
     completed_routines: number
@@ -231,7 +231,7 @@ export class RoutinesService {
   }
 
   // Routine Recommendations
-  static async getRoutineRecommendations(params?: {
+  async getRoutineRecommendations(params?: {
     user_id?: number
     fitness_level?: string
     goals?: string[]
@@ -243,7 +243,7 @@ export class RoutinesService {
     return apiClient.get(`${API_ENDPOINTS.ROUTINES.ROUTINES}/recommendations`, { params })
   }
 
-  static async getPersonalizedRoutines(userId: number, params?: {
+  async getPersonalizedRoutines(userId: number, params?: {
     fitness_level?: string
     goals?: string[]
     available_time?: number
@@ -254,7 +254,7 @@ export class RoutinesService {
   }
 
   // Bulk Operations
-  static async bulkAssignRoutines(data: {
+  async bulkAssignRoutines(data: {
     routine_id: number
     user_ids: number[]
     start_date: string
@@ -268,7 +268,7 @@ export class RoutinesService {
     return apiClient.post(`${API_ENDPOINTS.ROUTINES.ROUTINES}/bulk-assign`, data)
   }
 
-  static async bulkUpdateUserRoutines(data: {
+  async bulkUpdateUserRoutines(data: {
     user_routine_ids: number[]
     updates: {
       status?: string
@@ -283,7 +283,7 @@ export class RoutinesService {
     return apiClient.put(`${API_ENDPOINTS.ROUTINES.ROUTINES}/user-routines/bulk-update`, data)
   }
 
-  static async bulkImportRoutines(file: File): Promise<{
+  async bulkImportRoutines(file: File): Promise<{
     successful: number
     failed: number
     errors: Array<{ row: number; error: string }>
@@ -291,11 +291,11 @@ export class RoutinesService {
     return apiClient.uploadFile(`${API_ENDPOINTS.ROUTINES.ROUTINES}/bulk-import`, file)
   }
 
-  static async exportRoutines(params?: RoutineSearchParams): Promise<Blob> {
+  async exportRoutines(params?: RoutineSearchParams): Promise<Blob> {
     return apiClient.downloadFile(`${API_ENDPOINTS.ROUTINES.ROUTINES}/export`, { params })
   }
 
-  static async exportUserRoutines(params?: {
+  async exportUserRoutines(params?: {
     user_id?: number
     status?: string
     date_from?: string
@@ -305,4 +305,5 @@ export class RoutinesService {
   }
 }
 
-export const routinesService = RoutinesService
+export const routinesService = new RoutinesService()
+export default RoutinesService

@@ -26,14 +26,14 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "tauri://localhost",
-        "https://tauri.localhost"
-    ]
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:5174,http://127.0.0.1:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,tauri://localhost,https://tauri.localhost"
+    
+    @property
+    def cors_origins(self) -> List[str]:
+        """Parse ALLOWED_ORIGINS string into a list"""
+        if isinstance(self.ALLOWED_ORIGINS, str):
+            return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(',') if origin.strip()]
+        return self.ALLOWED_ORIGINS
     
     # File uploads
     UPLOAD_DIR: str = "uploads"

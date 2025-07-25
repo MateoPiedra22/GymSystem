@@ -140,7 +140,21 @@ class ApiClient {
           } catch (refreshError) {
             this.processQueue(refreshError, null)
             TokenManager.clearTokens()
-            window.location.href = '/login'
+            
+            // Don't force redirect for dashboard/stats API calls
+            // Let the components handle authentication gracefully
+            const isDashboardCall = originalRequest.url?.includes('/stats') || 
+                                   originalRequest.url?.includes('/statistics') ||
+                                   originalRequest.url?.includes('/api/v1/users') ||
+                                   originalRequest.url?.includes('/api/v1/classes') ||
+                                   originalRequest.url?.includes('/api/v1/memberships') ||
+                                   originalRequest.url?.includes('/api/v1/payments')
+            
+            if (!isDashboardCall) {
+              // Only redirect for non-dashboard calls
+              window.location.href = '/login'
+            }
+            
             return Promise.reject(refreshError)
           } finally {
             this.isRefreshing = false

@@ -110,11 +110,11 @@ export function CommunityPage() {
   const [showFilters, setShowFilters] = useState(false)
 
   // Simple debounce function
-  const debounce = (func: Function, delay: number) => {
+  const debounce = (func: (...args: any[]) => void, delay: number) => {
     let timeoutId: NodeJS.Timeout
     return (...args: any[]) => {
       clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => func.apply(null, args), delay)
+      timeoutId = setTimeout(() => func(...args), delay)
     }
   }
 

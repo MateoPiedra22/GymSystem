@@ -18,7 +18,7 @@ from ..schemas.membership import (
     PaymentCreate, PaymentResponse, PaymentList, PaymentStats
 )
 
-router = APIRouter(prefix="/memberships", tags=["Memberships"])
+router = APIRouter(tags=["Memberships"])
 
 @router.get("/", response_model=MembershipList)
 async def get_memberships(

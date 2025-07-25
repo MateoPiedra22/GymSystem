@@ -29,15 +29,15 @@ import {
 
 export class ClassesService {
   // Classes
-  static async getClasses(params?: ClassSearchParams): Promise<ClassListResponse> {
+  async getClasses(params?: ClassSearchParams): Promise<ClassListResponse> {
     return apiClient.get(API_ENDPOINTS.CLASSES.CLASSES, { params })
   }
 
-  static async getClass(id: number): Promise<GymClass> {
+  async getClass(id: number): Promise<GymClass> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.CLASSES}/${id}`)
   }
 
-  static async createClass(data: CreateClassRequest): Promise<GymClass> {
+  async createClass(data: CreateClassRequest): Promise<GymClass> {
     const formData = new FormData()
     
     // Add text fields
@@ -58,7 +58,7 @@ export class ClassesService {
     return response.data.data
   }
 
-  static async updateClass(id: number, data: UpdateClassRequest): Promise<GymClass> {
+  async updateClass(id: number, data: UpdateClassRequest): Promise<GymClass> {
     const formData = new FormData()
     
     // Add text fields
@@ -79,20 +79,20 @@ export class ClassesService {
     return response.data.data
   }
 
-  static async deleteClass(id: number): Promise<void> {
+  async deleteClass(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.CLASSES.CLASSES}/${id}`)
   }
 
-  static async toggleClassStatus(id: number): Promise<GymClass> {
+  async toggleClassStatus(id: number): Promise<GymClass> {
     return apiClient.patch(`${API_ENDPOINTS.CLASSES.CLASSES}/${id}/toggle-status`)
   }
 
   // Class Categories
-  static async getClassCategories(): Promise<ClassCategory[]> {
+  async getClassCategories(): Promise<ClassCategory[]> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.CLASSES}/categories`)
   }
 
-  static async createClassCategory(data: {
+  async createClassCategory(data: {
     name: string
     description: string
     icon?: string
@@ -101,7 +101,7 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.CLASSES}/categories`, data)
   }
 
-  static async updateClassCategory(id: number, data: {
+  async updateClassCategory(id: number, data: {
     name?: string
     description?: string
     icon?: string
@@ -111,32 +111,32 @@ export class ClassesService {
     return apiClient.put(`${API_ENDPOINTS.CLASSES.CLASSES}/categories/${id}`, data)
   }
 
-  static async deleteClassCategory(id: number): Promise<void> {
+  async deleteClassCategory(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.CLASSES.CLASSES}/categories/${id}`)
   }
 
   // Class Schedules
-  static async getSchedules(params?: ScheduleSearchParams): Promise<ScheduleListResponse> {
+  async getSchedules(params?: ScheduleSearchParams): Promise<ScheduleListResponse> {
     return apiClient.get(API_ENDPOINTS.CLASSES.SCHEDULES, { params })
   }
 
-  static async getSchedule(id: number): Promise<ClassSchedule> {
+  async getSchedule(id: number): Promise<ClassSchedule> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${id}`)
   }
 
-  static async createSchedule(data: CreateScheduleRequest): Promise<ClassSchedule> {
+  async createSchedule(data: CreateScheduleRequest): Promise<ClassSchedule> {
     return apiClient.post(API_ENDPOINTS.CLASSES.SCHEDULES, data)
   }
 
-  static async updateSchedule(id: number, data: UpdateScheduleRequest): Promise<ClassSchedule> {
+  async updateSchedule(id: number, data: UpdateScheduleRequest): Promise<ClassSchedule> {
     return apiClient.put(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${id}`, data)
   }
 
-  static async deleteSchedule(id: number): Promise<void> {
+  async deleteSchedule(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${id}`)
   }
 
-  static async cancelSchedule(id: number, data: {
+  async cancelSchedule(id: number, data: {
     reason: string
     notify_participants?: boolean
     refund_policy?: 'full' | 'partial' | 'none'
@@ -145,7 +145,7 @@ export class ClassesService {
   }
 
   // Recurring Schedules
-  static async createRecurringSchedule(data: {
+  async createRecurringSchedule(data: {
     class_id: number
     instructor_id: number
     room: string
@@ -168,7 +168,7 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.SCHEDULES}/recurring`, data)
   }
 
-  static async updateRecurringSchedule(id: number, data: {
+  async updateRecurringSchedule(id: number, data: {
     end_date?: string
     recurrence_pattern?: any
     time_slots?: any[]
@@ -178,7 +178,7 @@ export class ClassesService {
     return apiClient.put(`${API_ENDPOINTS.CLASSES.SCHEDULES}/recurring/${id}`, data)
   }
 
-  static async deleteRecurringSchedule(id: number, data: {
+  async deleteRecurringSchedule(id: number, data: {
     delete_future_only?: boolean
     notify_participants?: boolean
   }): Promise<void> {
@@ -186,35 +186,35 @@ export class ClassesService {
   }
 
   // Class Bookings
-  static async getBookings(params?: BookingSearchParams): Promise<BookingListResponse> {
+  async getBookings(params?: BookingSearchParams): Promise<BookingListResponse> {
     return apiClient.get(API_ENDPOINTS.CLASSES.BOOKINGS, { params })
   }
 
-  static async getBooking(id: number): Promise<ClassBooking> {
+  async getBooking(id: number): Promise<ClassBooking> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.BOOKINGS}/${id}`)
   }
 
-  static async createBooking(data: BookClassRequest): Promise<ClassBooking> {
+  async createBooking(data: BookClassRequest): Promise<ClassBooking> {
     return apiClient.post(API_ENDPOINTS.CLASSES.BOOKINGS, data)
   }
 
-  static async cancelBooking(id: number, data?: {
+  async cancelBooking(id: number, data?: {
     reason?: string
     refund_requested?: boolean
   }): Promise<ClassBooking> {
     return apiClient.patch(`${API_ENDPOINTS.CLASSES.BOOKINGS}/${id}/cancel`, data)
   }
 
-  static async checkInBooking(id: number): Promise<ClassBooking> {
+  async checkInBooking(id: number): Promise<ClassBooking> {
     return apiClient.patch(`${API_ENDPOINTS.CLASSES.BOOKINGS}/${id}/check-in`)
   }
 
-  static async noShowBooking(id: number, reason?: string): Promise<ClassBooking> {
+  async noShowBooking(id: number, reason?: string): Promise<ClassBooking> {
     return apiClient.patch(`${API_ENDPOINTS.CLASSES.BOOKINGS}/${id}/no-show`, { reason })
   }
 
   // Waitlist
-  static async joinWaitlist(scheduleId: number, data?: {
+  async joinWaitlist(scheduleId: number, data?: {
     user_id?: number
     priority?: number
     notes?: string
@@ -222,15 +222,15 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${scheduleId}/waitlist`, data)
   }
 
-  static async leaveWaitlist(waitlistId: number): Promise<void> {
+  async leaveWaitlist(waitlistId: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.CLASSES.SCHEDULES}/waitlist/${waitlistId}`)
   }
 
-  static async getWaitlist(scheduleId: number): Promise<ClassWaitlist[]> {
+  async getWaitlist(scheduleId: number): Promise<ClassWaitlist[]> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${scheduleId}/waitlist`)
   }
 
-  static async processWaitlist(scheduleId: number, data: {
+  async processWaitlist(scheduleId: number, data: {
     auto_book?: boolean
     notification_message?: string
   }): Promise<{
@@ -242,7 +242,7 @@ export class ClassesService {
   }
 
   // Class Attendance
-  static async markAttendance(scheduleId: number, data: {
+  async markAttendance(scheduleId: number, data: {
     attendees: Array<{
       user_id: number
       status: 'present' | 'absent' | 'late'
@@ -253,11 +253,11 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${scheduleId}/attendance`, data)
   }
 
-  static async getAttendance(scheduleId: number): Promise<ClassAttendance[]> {
+  async getAttendance(scheduleId: number): Promise<ClassAttendance[]> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${scheduleId}/attendance`)
   }
 
-  static async updateAttendance(attendanceId: number, data: {
+  async updateAttendance(attendanceId: number, data: {
     status?: 'present' | 'absent' | 'late'
     check_in_time?: string
     notes?: string
@@ -266,7 +266,7 @@ export class ClassesService {
   }
 
   // Class Ratings
-  static async rateClass(scheduleId: number, data: {
+  async rateClass(scheduleId: number, data: {
     rating: number
     review?: string
     instructor_rating?: number
@@ -276,7 +276,7 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.SCHEDULES}/${scheduleId}/rate`, data)
   }
 
-  static async getClassRatings(classId: number, params?: {
+  async getClassRatings(classId: number, params?: {
     limit?: number
     offset?: number
     min_rating?: number
@@ -284,7 +284,7 @@ export class ClassesService {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.CLASSES}/${classId}/ratings`, { params })
   }
 
-  static async updateRating(ratingId: number, data: {
+  async updateRating(ratingId: number, data: {
     rating?: number
     review?: string
     instructor_rating?: number
@@ -294,16 +294,16 @@ export class ClassesService {
     return apiClient.put(`${API_ENDPOINTS.CLASSES.SCHEDULES}/ratings/${ratingId}`, data)
   }
 
-  static async deleteRating(ratingId: number): Promise<void> {
+  async deleteRating(ratingId: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.CLASSES.SCHEDULES}/ratings/${ratingId}`)
   }
 
   // Class Packages
-  static async getClassPackages(): Promise<ClassPackage[]> {
+  async getClassPackages(): Promise<ClassPackage[]> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.CLASSES}/packages`)
   }
 
-  static async createClassPackage(data: {
+  async createClassPackage(data: {
     name: string
     description: string
     class_credits: number
@@ -316,7 +316,7 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.CLASSES}/packages`, data)
   }
 
-  static async updateClassPackage(id: number, data: {
+  async updateClassPackage(id: number, data: {
     name?: string
     description?: string
     class_credits?: number
@@ -330,16 +330,16 @@ export class ClassesService {
     return apiClient.put(`${API_ENDPOINTS.CLASSES.CLASSES}/packages/${id}`, data)
   }
 
-  static async deleteClassPackage(id: number): Promise<void> {
+  async deleteClassPackage(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.CLASSES.CLASSES}/packages/${id}`)
   }
 
   // User Class Packages
-  static async getUserClassPackages(userId: number): Promise<UserClassPackage[]> {
+  async getUserClassPackages(userId: number): Promise<UserClassPackage[]> {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.CLASSES}/users/${userId}/packages`)
   }
 
-  static async purchaseClassPackage(data: {
+  async purchaseClassPackage(data: {
     user_id: number
     package_id: number
     payment_method_id?: number
@@ -348,7 +348,7 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.CLASSES}/packages/purchase`, data)
   }
 
-  static async transferClassPackage(packageId: number, data: {
+  async transferClassPackage(packageId: number, data: {
     to_user_id: number
     credits_to_transfer: number
     reason?: string
@@ -357,11 +357,11 @@ export class ClassesService {
   }
 
   // Class Statistics
-  static async getClassStatistics(): Promise<ClassStatistics> {
+  async getClassStatistics(): Promise<ClassStatistics> {
     return apiClient.get(API_ENDPOINTS.CLASSES.STATS)
   }
 
-  static async getClassUsageStats(classId: number): Promise<{
+  async getClassUsageStats(classId: number): Promise<{
     total_schedules: number
     total_bookings: number
     total_attendees: number
@@ -376,7 +376,7 @@ export class ClassesService {
     return apiClient.get(`${API_ENDPOINTS.CLASSES.CLASSES}/${classId}/usage-stats`)
   }
 
-  static async getInstructorStats(instructorId: number): Promise<{
+  async getInstructorStats(instructorId: number): Promise<{
     total_classes_taught: number
     total_students: number
     average_class_rating: number
@@ -391,7 +391,7 @@ export class ClassesService {
   }
 
   // Bulk Operations
-  static async bulkCreateSchedules(data: {
+  async bulkCreateSchedules(data: {
     schedules: Array<{
       class_id: number
       instructor_id: number
@@ -409,7 +409,7 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.SCHEDULES}/bulk-create`, data)
   }
 
-  static async bulkCancelBookings(data: {
+  async bulkCancelBookings(data: {
     booking_ids: number[]
     reason: string
     refund_policy?: 'full' | 'partial' | 'none'
@@ -422,7 +422,7 @@ export class ClassesService {
     return apiClient.post(`${API_ENDPOINTS.CLASSES.BOOKINGS}/bulk-cancel`, data)
   }
 
-  static async exportClassData(params?: {
+  async exportClassData(params?: {
     class_id?: number
     date_from?: string
     date_to?: string
@@ -433,7 +433,7 @@ export class ClassesService {
     return apiClient.downloadFile(`${API_ENDPOINTS.CLASSES.CLASSES}/export`, { params })
   }
 
-  static async exportSchedules(params?: {
+  async exportSchedules(params?: {
     date_from?: string
     date_to?: string
     instructor_id?: number
@@ -443,5 +443,5 @@ export class ClassesService {
   }
 }
 
-export const classesService = ClassesService
-export default ClassesService
+export const classesService = new ClassesService()
+export default classesService

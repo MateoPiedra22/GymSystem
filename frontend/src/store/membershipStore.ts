@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { MembershipsService } from '../api/services/memberships'
+import { membershipsService } from '../api/services/memberships'
 import {
   MembershipPlan,
   UserMembership,
@@ -129,7 +129,7 @@ export const useMembershipStore = create<MembershipState>()(
         getMembershipPlans: async (params?: PaginationParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await MembershipsService.getMembershipPlans(params)
+            const response = await membershipsService.getMembershipPlans(params)
             set({
               membershipPlans: response.items,
               planPagination: {
@@ -151,7 +151,7 @@ export const useMembershipStore = create<MembershipState>()(
         getMembershipPlan: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const plan = await MembershipsService.getMembershipPlan(id)
+            const plan = await membershipsService.getMembershipPlan(id)
             set({ currentPlan: plan, loading: false })
           } catch (error: any) {
             set({ 
@@ -164,7 +164,7 @@ export const useMembershipStore = create<MembershipState>()(
         createMembershipPlan: async (data: CreateMembershipPlanRequest) => {
           set({ loading: true, error: null })
           try {
-            const newPlan = await MembershipsService.createMembershipPlan(data)
+            const newPlan = await membershipsService.createMembershipPlan(data)
             const { membershipPlans } = get()
             set({ 
               membershipPlans: [newPlan, ...membershipPlans],
@@ -183,7 +183,7 @@ export const useMembershipStore = create<MembershipState>()(
         updateMembershipPlan: async (id: number, data: UpdateMembershipPlanRequest) => {
           set({ loading: true, error: null })
           try {
-            const updatedPlan = await MembershipsService.updateMembershipPlan(id, data)
+            const updatedPlan = await membershipsService.updateMembershipPlan(id, data)
             const { membershipPlans, currentPlan } = get()
             set({ 
               membershipPlans: membershipPlans.map(p => p.id === id ? updatedPlan : p),
@@ -203,7 +203,7 @@ export const useMembershipStore = create<MembershipState>()(
         deleteMembershipPlan: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await MembershipsService.deleteMembershipPlan(id)
+            await membershipsService.deleteMembershipPlan(id)
             const { membershipPlans } = get()
             set({ 
               membershipPlans: membershipPlans.filter(p => p.id !== id),
@@ -222,7 +222,7 @@ export const useMembershipStore = create<MembershipState>()(
         toggleMembershipPlanStatus: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedPlan = await MembershipsService.toggleMembershipPlanStatus(id)
+            const updatedPlan = await membershipsService.toggleMembershipPlanStatus(id)
             const { membershipPlans, currentPlan } = get()
             set({ 
               membershipPlans: membershipPlans.map(p => p.id === id ? updatedPlan : p),
@@ -243,7 +243,7 @@ export const useMembershipStore = create<MembershipState>()(
         getUserMemberships: async (params?: MembershipSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await MembershipsService.getUserMemberships(params)
+            const response = await membershipsService.getUserMemberships(params)
             set({
               userMemberships: response.items,
               membershipPagination: {
@@ -265,7 +265,7 @@ export const useMembershipStore = create<MembershipState>()(
         getUserMembership: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const membership = await MembershipsService.getUserMembership(id)
+            const membership = await membershipsService.getUserMembership(id)
             set({ currentMembership: membership, loading: false })
           } catch (error: any) {
             set({ 
@@ -278,7 +278,7 @@ export const useMembershipStore = create<MembershipState>()(
         assignMembership: async (data: AssignMembershipRequest) => {
           set({ loading: true, error: null })
           try {
-            const newMembership = await MembershipsService.assignMembership(data)
+            const newMembership = await membershipsService.assignMembership(data)
             const { userMemberships } = get()
             set({ 
               userMemberships: [newMembership, ...userMemberships],
@@ -297,7 +297,7 @@ export const useMembershipStore = create<MembershipState>()(
         cancelMembership: async (id: number, reason?: string) => {
           set({ loading: true, error: null })
           try {
-            const updatedMembership = await MembershipsService.cancelMembership(id, reason)
+            const updatedMembership = await membershipsService.cancelMembership(id, reason)
             const { userMemberships, currentMembership } = get()
             set({ 
               userMemberships: userMemberships.map(m => m.id === id ? updatedMembership : m),
@@ -317,7 +317,7 @@ export const useMembershipStore = create<MembershipState>()(
         suspendMembership: async (id: number, reason?: string) => {
           set({ loading: true, error: null })
           try {
-            const updatedMembership = await MembershipsService.suspendMembership(id, reason)
+            const updatedMembership = await membershipsService.suspendMembership(id, reason)
             const { userMemberships, currentMembership } = get()
             set({ 
               userMemberships: userMemberships.map(m => m.id === id ? updatedMembership : m),
@@ -337,7 +337,7 @@ export const useMembershipStore = create<MembershipState>()(
         reactivateMembership: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedMembership = await MembershipsService.reactivateMembership(id)
+            const updatedMembership = await membershipsService.reactivateMembership(id)
             const { userMemberships, currentMembership } = get()
             set({ 
               userMemberships: userMemberships.map(m => m.id === id ? updatedMembership : m),
@@ -357,7 +357,7 @@ export const useMembershipStore = create<MembershipState>()(
         renewMembership: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const renewedMembership = await MembershipsService.renewMembership(id)
+            const renewedMembership = await membershipsService.renewMembership(id)
             const { userMemberships, currentMembership } = get()
             set({ 
               userMemberships: userMemberships.map(m => m.id === id ? renewedMembership : m),
@@ -378,7 +378,7 @@ export const useMembershipStore = create<MembershipState>()(
         getMembershipStatistics: async () => {
           set({ loading: true, error: null })
           try {
-            const membershipStats = await MembershipsService.getMembershipStatistics()
+            const membershipStats = await membershipsService.getMembershipStatistics()
             set({ membershipStats, loading: false })
           } catch (error: any) {
             set({ 
@@ -391,7 +391,7 @@ export const useMembershipStore = create<MembershipState>()(
         getMembershipUsage: async (membershipId: number) => {
           set({ loading: true, error: null })
           try {
-            const membershipUsage = await MembershipsService.getMembershipUsage(membershipId)
+            const membershipUsage = await membershipsService.getMembershipUsage(membershipId)
             set({ membershipUsage, loading: false })
           } catch (error: any) {
             set({ 
@@ -404,7 +404,7 @@ export const useMembershipStore = create<MembershipState>()(
         getExpiringMemberships: async (days?: number) => {
           set({ loading: true, error: null })
           try {
-            const expiringMemberships = await MembershipsService.getExpiringMemberships(days)
+            const expiringMemberships = await membershipsService.getExpiringMemberships(days)
             set({ expiringMemberships, loading: false })
           } catch (error: any) {
             set({ 
@@ -417,7 +417,7 @@ export const useMembershipStore = create<MembershipState>()(
         sendRenewalReminders: async (membershipIds: number[]) => {
           set({ loading: true, error: null })
           try {
-            await MembershipsService.sendRenewalReminders(membershipIds)
+            await membershipsService.sendRenewalReminders(membershipIds)
             set({ loading: false })
             return true
           } catch (error: any) {
@@ -438,7 +438,7 @@ export const useMembershipStore = create<MembershipState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const newMemberships = await MembershipsService.bulkAssignMemberships(data)
+            const newMemberships = await membershipsService.bulkAssignMemberships(data)
             const { userMemberships } = get()
             set({ 
               userMemberships: [...newMemberships, ...userMemberships],
@@ -460,7 +460,7 @@ export const useMembershipStore = create<MembershipState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            await MembershipsService.bulkCancelMemberships(data)
+            await membershipsService.bulkCancelMemberships(data)
             // Refresh memberships list
             await get().getUserMemberships()
             set({ loading: false })
@@ -478,7 +478,7 @@ export const useMembershipStore = create<MembershipState>()(
         exportMemberships: async (params?: MembershipSearchParams) => {
           set({ loading: true, error: null })
           try {
-            await MembershipsService.exportMemberships(params)
+            await membershipsService.exportMemberships(params)
             set({ loading: false })
             return true
           } catch (error: any) {
@@ -493,7 +493,7 @@ export const useMembershipStore = create<MembershipState>()(
         importMemberships: async (file: File) => {
           set({ loading: true, error: null })
           try {
-            const result = await MembershipsService.importMemberships(file)
+            const result = await membershipsService.importMemberships(file)
             // Refresh memberships list after import
             await get().getUserMemberships()
             set({ loading: false })

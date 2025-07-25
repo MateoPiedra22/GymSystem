@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { EmployeesService } from '../api/services/employees'
+import { employeesService } from '../api/services/employees'
 import {
   Employee,
   Certification,
@@ -331,7 +331,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         getEmployees: async (params?: EmployeeSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await EmployeesService.getEmployees(params)
+            const response = await employeesService.getEmployees(params)
             set({
               employees: response.items,
               employeePagination: {
@@ -353,7 +353,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         getEmployee: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const employee = await EmployeesService.getEmployee(id)
+            const employee = await employeesService.getEmployee(id)
             set({ currentEmployee: employee, loading: false })
           } catch (error: any) {
             set({ 
@@ -366,7 +366,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         createEmployee: async (data: CreateEmployeeRequest) => {
           set({ loading: true, error: null })
           try {
-            const newEmployee = await EmployeesService.createEmployee(data)
+            const newEmployee = await employeesService.createEmployee(data)
             const { employees } = get()
             set({ 
               employees: [newEmployee, ...employees],
@@ -385,7 +385,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         updateEmployee: async (id: number, data: UpdateEmployeeRequest) => {
           set({ loading: true, error: null })
           try {
-            const updatedEmployee = await EmployeesService.updateEmployee(id, data)
+            const updatedEmployee = await employeesService.updateEmployee(id, data)
             const { employees, currentEmployee } = get()
             set({ 
               employees: employees.map(e => e.id === id ? updatedEmployee : e),
@@ -405,7 +405,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         deleteEmployee: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await EmployeesService.deleteEmployee(id)
+            await employeesService.deleteEmployee(id)
             const { employees } = get()
             set({ 
               employees: employees.filter(e => e.id !== id),
@@ -424,7 +424,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         toggleEmployeeStatus: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedEmployee = await EmployeesService.toggleEmployeeStatus(id)
+            const updatedEmployee = await employeesService.toggleEmployeeStatus(id)
             const { employees, currentEmployee } = get()
             set({ 
               employees: employees.map(e => e.id === id ? updatedEmployee : e),
@@ -450,7 +450,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const terminatedEmployee = await EmployeesService.terminateEmployee(id, data)
+            const terminatedEmployee = await employeesService.terminateEmployee(id, data)
             const { employees, currentEmployee } = get()
             set({ 
               employees: employees.map(e => e.id === id ? terminatedEmployee : e),
@@ -476,7 +476,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const rehiredEmployee = await EmployeesService.rehireEmployee(id, data)
+            const rehiredEmployee = await employeesService.rehireEmployee(id, data)
             const { employees, currentEmployee } = get()
             set({ 
               employees: employees.map(e => e.id === id ? rehiredEmployee : e),
@@ -497,7 +497,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         getDepartments: async () => {
           set({ loading: true, error: null })
           try {
-            const departments = await EmployeesService.getDepartments()
+            const departments = await employeesService.getDepartments()
             set({ departments, loading: false })
           } catch (error: any) {
             set({ 
@@ -516,7 +516,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const newDepartment = await EmployeesService.createDepartment(data)
+            const newDepartment = await employeesService.createDepartment(data)
             const { departments } = get()
             set({ 
               departments: [newDepartment, ...departments],
@@ -542,7 +542,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const updatedDepartment = await EmployeesService.updateDepartment(id, data)
+            const updatedDepartment = await employeesService.updateDepartment(id, data)
             const { departments, currentDepartment } = get()
             set({ 
               departments: departments.map(d => d.id === id ? updatedDepartment : d),
@@ -562,7 +562,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         deleteDepartment: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await EmployeesService.deleteDepartment(id)
+            await employeesService.deleteDepartment(id)
             const { departments } = get()
             set({ 
               departments: departments.filter(d => d.id !== id),
@@ -582,7 +582,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         getPositions: async () => {
           set({ loading: true, error: null })
           try {
-            const positions = await EmployeesService.getPositions()
+            const positions = await employeesService.getPositions()
             set({ positions, loading: false })
           } catch (error: any) {
             set({ 
@@ -603,7 +603,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const newPosition = await EmployeesService.createPosition(data)
+            const newPosition = await employeesService.createPosition(data)
             const { positions } = get()
             set({ 
               positions: [newPosition, ...positions],
@@ -631,7 +631,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         }) => {
           set({ loading: true, error: null })
           try {
-            const updatedPosition = await EmployeesService.updatePosition(id, data)
+            const updatedPosition = await employeesService.updatePosition(id, data)
             const { positions, currentPosition } = get()
             set({ 
               positions: positions.map(p => p.id === id ? updatedPosition : p),
@@ -651,7 +651,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         deletePosition: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await EmployeesService.deletePosition(id)
+            await employeesService.deletePosition(id)
             const { positions } = get()
             set({ 
               positions: positions.filter(p => p.id !== id),
@@ -671,7 +671,7 @@ export const useEmployeeStore = create<EmployeeState>()(
         getCertifications: async (employeeId?: number) => {
           set({ loading: true, error: null })
           try {
-            const certifications = await EmployeesService.getCertifications(employeeId)
+            const certifications = await employeesService.getCertifications(employeeId)
             set({ certifications, loading: false })
           } catch (error: any) {
             set({ 

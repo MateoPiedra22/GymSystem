@@ -46,76 +46,111 @@ import {
 } from 'recharts'
 import { useDashboardStore } from '../../store'
 
-// Mock data for enhanced dashboard
-const revenueData = [
-  { month: 'Ene', revenue: 45000, expenses: 25000, members: 120 },
-  { month: 'Feb', revenue: 52000, expenses: 28000, members: 135 },
-  { month: 'Mar', revenue: 48000, expenses: 26000, members: 128 },
-  { month: 'Abr', revenue: 61000, expenses: 32000, members: 152 },
-  { month: 'May', revenue: 55000, expenses: 29000, members: 145 },
-  { month: 'Jun', revenue: 67000, expenses: 35000, members: 168 }
-]
-
-const attendanceData = [
-  { day: 'Lun', morning: 25, afternoon: 35, evening: 45 },
-  { day: 'Mar', morning: 30, afternoon: 40, evening: 50 },
-  { day: 'Mié', morning: 28, afternoon: 38, evening: 48 },
-  { day: 'Jue', morning: 32, afternoon: 42, evening: 52 },
-  { day: 'Vie', morning: 35, afternoon: 45, evening: 55 },
-  { day: 'Sáb', morning: 40, afternoon: 30, evening: 25 },
-  { day: 'Dom', morning: 20, afternoon: 25, evening: 15 }
-]
-
-const membershipDistribution = [
-  { name: 'Básica', value: 45, color: '#3B82F6' },
-  { name: 'Premium', value: 30, color: '#10B981' },
-  { name: 'VIP', value: 15, color: '#F59E0B' },
-  { name: 'Estudiante', value: 10, color: '#EF4444' }
-]
-
-const equipmentUsage = [
-  { equipment: 'Caminadoras', usage: 85, capacity: 100 },
-  { equipment: 'Pesas', usage: 92, capacity: 100 },
-  { equipment: 'Bicicletas', usage: 78, capacity: 100 },
-  { equipment: 'Máquinas', usage: 65, capacity: 100 },
-  { equipment: 'Funcional', usage: 88, capacity: 100 }
-]
-
-const notifications = [
-  { id: 1, type: 'success', title: 'Nuevo miembro registrado', message: 'Juan Pérez se ha unido al gimnasio', time: '5 min' },
-  { id: 2, type: 'warning', title: 'Pago pendiente', message: '3 miembros tienen pagos vencidos', time: '15 min' },
-  { id: 3, type: 'info', title: 'Clase cancelada', message: 'Yoga de las 18:00 ha sido cancelada', time: '30 min' },
-  { id: 4, type: 'error', title: 'Equipo fuera de servicio', message: 'Caminadora #3 requiere mantenimiento', time: '1 h' }
-]
-
-const quickActions = [
-  { name: 'Nuevo Miembro', action: 'new-member', icon: UserPlus, color: 'bg-blue-600 hover:bg-blue-700' },
-  { name: 'Check-in Rápido', action: 'quick-checkin', icon: UserCheck, color: 'bg-green-600 hover:bg-green-700' },
-  { name: 'Nueva Rutina', action: 'new-routine', icon: Dumbbell, color: 'bg-purple-600 hover:bg-purple-700' },
-  { name: 'Programar Clase', action: 'schedule-class', icon: Calendar, color: 'bg-orange-600 hover:bg-orange-700' },
-  { name: 'Mensaje Masivo', action: 'mass-message', icon: MessageSquare, color: 'bg-indigo-600 hover:bg-indigo-700' },
-  { name: 'Generar Reporte', action: 'generate-report', icon: BarChart3, color: 'bg-pink-600 hover:bg-pink-700' }
-]
+// Dashboard data will be fetched from backend
+const getDashboardData = async () => {
+  // This will be replaced with actual API calls to dashboard endpoints
+  return {
+    revenueData: [
+      { month: 'Ene', revenue: 15000, expenses: 8000 },
+      { month: 'Feb', revenue: 18000, expenses: 9500 },
+      { month: 'Mar', revenue: 16500, expenses: 8800 },
+      { month: 'Abr', revenue: 20000, expenses: 11000 },
+      { month: 'May', revenue: 22000, expenses: 12000 },
+      { month: 'Jun', revenue: 25000, expenses: 13500 }
+    ],
+    attendanceData: [
+      { day: 'Lun', morning: 25, afternoon: 35, evening: 45 },
+      { day: 'Mar', morning: 30, afternoon: 40, evening: 50 },
+      { day: 'Mié', morning: 22, afternoon: 32, evening: 38 },
+      { day: 'Jue', morning: 28, afternoon: 38, evening: 48 },
+      { day: 'Vie', morning: 35, afternoon: 45, evening: 55 },
+      { day: 'Sáb', morning: 20, afternoon: 30, evening: 35 },
+      { day: 'Dom', morning: 15, afternoon: 25, evening: 30 }
+    ],
+    membershipDistribution: [
+      { name: 'Premium', value: 45, color: '#3B82F6' },
+      { name: 'Básico', value: 35, color: '#10B981' },
+      { name: 'VIP', value: 20, color: '#F59E0B' }
+    ],
+    equipmentUsage: [
+      { equipment: 'Caminadoras', usage: 85 },
+      { equipment: 'Pesas', usage: 92 },
+      { equipment: 'Bicicletas', usage: 78 },
+      { equipment: 'Elípticas', usage: 65 },
+      { equipment: 'Máquinas', usage: 88 }
+    ],
+    notifications: [
+      {
+        id: 1,
+        title: 'Nuevo miembro registrado',
+        message: 'Juan Pérez se ha registrado como miembro Premium',
+        time: '2 min',
+        type: 'success'
+      },
+      {
+        id: 2,
+        title: 'Pago pendiente',
+        message: 'María García tiene un pago pendiente de $150',
+        time: '15 min',
+        type: 'warning'
+      },
+      {
+        id: 3,
+        title: 'Clase cancelada',
+        message: 'La clase de Yoga de las 18:00 ha sido cancelada',
+        time: '1 hora',
+        type: 'error'
+      }
+    ],
+    quickActions: [
+      { name: 'Nuevo Miembro', action: 'new-member', icon: UserPlus, color: 'bg-blue-600 hover:bg-blue-700' },
+      { name: 'Check-in Rápido', action: 'quick-checkin', icon: UserCheck, color: 'bg-green-600 hover:bg-green-700' },
+      { name: 'Nueva Rutina', action: 'new-routine', icon: Dumbbell, color: 'bg-purple-600 hover:bg-purple-700' },
+      { name: 'Programar Clase', action: 'schedule-class', icon: Calendar, color: 'bg-orange-600 hover:bg-orange-700' },
+      { name: 'Mensaje Masivo', action: 'mass-message', icon: MessageSquare, color: 'bg-indigo-600 hover:bg-indigo-700' },
+      { name: 'Generar Reporte', action: 'generate-report', icon: BarChart3, color: 'bg-pink-600 hover:bg-pink-700' }
+    ]
+  }
+}
 
 export function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('month')
   const [selectedKPIView, setSelectedKPIView] = useState('overview')
+  const [dashboardData, setDashboardData] = useState<any>(null)
   const {
+    stats,
     loading,
     error,
-    loadDashboardData
+    lastUpdated,
+    loadDashboardData,
+    refreshStats
   } = useDashboardStore()
 
+  const handleRefresh = async () => {
+    await refreshStats()
+  }
+
   useEffect(() => {
+    const fetchData = async () => {
+      const data = await getDashboardData()
+      setDashboardData(data)
+    }
+    fetchData()
     loadDashboardData()
   }, [loadDashboardData])
 
-  // Enhanced KPI cards with more metrics
+  const { revenueData = [], attendanceData = [], membershipDistribution = [], equipmentUsage = [], notifications = [], quickActions = [] } = dashboardData || {}
+
+  // Use real data from store when available, fallback to mock data
+  const formatCurrency = (amount: number) => `$${amount.toLocaleString()}`
+  const formatPercentage = (value: number) => `${value.toFixed(1)}%`
+
+  // Enhanced KPI cards with real data from store
   const kpiCards = [
     {
       title: 'Miembros Activos',
-      value: '168',
-      change: '+12.5%',
+      value: stats?.activeUsers?.toString() || '168',
+      change: stats?.userGrowthPercentage ? `+${formatPercentage(stats.userGrowthPercentage)}` : '+12.5%',
       trend: 'up',
       icon: Users,
       color: 'text-blue-600',
@@ -124,8 +159,8 @@ export function DashboardPage() {
     },
     {
       title: 'Ingresos Mensuales',
-      value: '$67,000',
-      change: '+8.2%',
+      value: stats?.revenueThisMonth ? formatCurrency(stats.revenueThisMonth) : '$67,000',
+      change: stats?.revenueGrowthPercentage ? `+${formatPercentage(stats.revenueGrowthPercentage)}` : '+8.2%',
       trend: 'up',
       icon: DollarSign,
       color: 'text-green-600',
@@ -134,7 +169,7 @@ export function DashboardPage() {
     },
     {
       title: 'Clases Programadas',
-      value: '156',
+      value: stats?.classesThisWeek?.toString() || '156',
       change: '+5.1%',
       trend: 'up',
       icon: Calendar,
@@ -144,7 +179,7 @@ export function DashboardPage() {
     },
     {
       title: 'Tasa de Asistencia',
-      value: '87.3%',
+      value: stats?.averageAttendance ? formatPercentage(stats.averageAttendance) : '87.3%',
       change: '-2.1%',
       trend: 'down',
       icon: Activity,
@@ -154,7 +189,7 @@ export function DashboardPage() {
     },
     {
       title: 'Nuevos Miembros',
-      value: '23',
+      value: stats?.newUsersThisMonth?.toString() || '23',
       change: '+15.8%',
       trend: 'up',
       icon: UserPlus,
@@ -163,34 +198,34 @@ export function DashboardPage() {
       description: 'Nuevos miembros este mes'
     },
     {
-      title: 'Retención',
-      value: '94.2%',
+      title: 'Membresías Activas',
+      value: stats?.activeMemberships?.toString() || '142',
       change: '+1.3%',
       trend: 'up',
       icon: Target,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-50',
-      description: 'Tasa de retención mensual'
+      description: 'Membresías activas'
     },
     {
-      title: 'Uso de Equipos',
-      value: '81.6%',
+      title: 'Empleados Activos',
+      value: stats?.activeEmployees?.toString() || '12',
       change: '+3.7%',
       trend: 'up',
       icon: Dumbbell,
       color: 'text-red-600',
       bgColor: 'bg-red-50',
-      description: 'Promedio de uso de equipos'
+      description: 'Empleados activos'
     },
     {
-      title: 'Satisfacción',
-      value: '4.8/5',
+      title: 'Ingresos Totales',
+      value: stats?.totalRevenue ? formatCurrency(stats.totalRevenue) : '$245,000',
       change: '+0.2',
       trend: 'up',
       icon: Heart,
       color: 'text-pink-600',
       bgColor: 'bg-pink-50',
-      description: 'Calificación promedio'
+      description: 'Ingresos totales'
     }
   ]
 
@@ -248,7 +283,7 @@ export function DashboardPage() {
           <p className="text-gray-600 mt-1">Resumen completo del rendimiento del gimnasio</p>
           <div className="flex items-center space-x-4 mt-2">
             <Badge variant="outline" className="text-xs">
-              Última actualización: {new Date().toLocaleTimeString()}
+              Última actualización: {lastUpdated ? new Date(lastUpdated).toLocaleTimeString() : new Date().toLocaleTimeString()}
             </Badge>
             <Badge className="bg-green-100 text-green-800 text-xs">
               Sistema operativo
@@ -276,184 +311,187 @@ export function DashboardPage() {
             <Download className="h-4 w-4 mr-2" />
             Exportar
           </Button>
-          <Button size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
+          <Button size="sm" onClick={handleRefresh} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Actualizar
           </Button>
         </div>
       </div>
 
-      {/* KPI Selection Tabs */}
-      <Tabs value={selectedKPIView} onValueChange={setSelectedKPIView}>
-        <TabsList>
-          <TabsTrigger value="overview">Resumen</TabsTrigger>
-          <TabsTrigger value="financial">Financiero</TabsTrigger>
-          <TabsTrigger value="operational">Operacional</TabsTrigger>
-          <TabsTrigger value="satisfaction">Satisfacción</TabsTrigger>
-        </TabsList>
+      {/* Main Dashboard Layout - Side by Side */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Left Side - KPI Selection Tabs */}
+        <div className="lg:col-span-3">
+          <Tabs value={selectedKPIView} onValueChange={setSelectedKPIView}>
+            <TabsList>
+              <TabsTrigger value="overview">Resumen</TabsTrigger>
+              <TabsTrigger value="financial">Financiero</TabsTrigger>
+              <TabsTrigger value="operational">Operacional</TabsTrigger>
+              <TabsTrigger value="satisfaction">Satisfacción</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Main KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {kpiCards.slice(0, 4).map((kpi, index) => {
-              const Icon = kpi.icon
-              const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
-              
-              return (
-                <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
-                          <Icon className={`h-6 w-6 ${kpi.color}`} />
+            <TabsContent value="overview" className="space-y-6">
+              {/* Main KPI Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
+                {kpiCards.slice(0, 4).map((kpi: any, index: number) => {
+                  const Icon = kpi.icon
+                  const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
+                  
+                  return (
+                    <Card key={index} className="hover:shadow-lg transition-shadow cursor-pointer">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
+                              <Icon className={`h-6 w-6 ${kpi.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
+                              <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
+                              <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                          <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-                          <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                        <div className="mt-4 flex items-center">
+                          <TrendIcon className={`h-4 w-4 mr-1 ${
+                            kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                          }`} />
+                          <span className={`text-sm font-medium ${
+                            kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {kpi.change}
+                          </span>
+                          <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
                         </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center">
-                      <TrendIcon className={`h-4 w-4 mr-1 ${
-                        kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                      }`} />
-                      <span className={`text-sm font-medium ${
-                        kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {kpi.change}
-                      </span>
-                      <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
             </TabsContent>
 
-        <TabsContent value="financial" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[kpiCards[1], kpiCards[4], kpiCards[5]].map((kpi, index) => {
-              const Icon = kpi.icon
-              const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
-              
-              return (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
-                          <Icon className={`h-6 w-6 ${kpi.color}`} />
+            <TabsContent value="financial" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
+                {[kpiCards[1], kpiCards[4], kpiCards[5]].map((kpi: any, index: number) => {
+                  const Icon = kpi.icon
+                  const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
+                  
+                  return (
+                    <Card key={index} className="hover:shadow-lg transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
+                              <Icon className={`h-6 w-6 ${kpi.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
+                              <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
+                              <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                          <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-                          <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                        <div className="mt-4 flex items-center">
+                          <TrendIcon className={`h-4 w-4 mr-1 ${
+                            kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                          }`} />
+                          <span className={`text-sm font-medium ${
+                            kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {kpi.change}
+                          </span>
+                          <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
                         </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center">
-                      <TrendIcon className={`h-4 w-4 mr-1 ${
-                        kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                      }`} />
-                      <span className={`text-sm font-medium ${
-                        kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {kpi.change}
-                      </span>
-                      <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </TabsContent>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </TabsContent>
 
-        <TabsContent value="operational" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[kpiCards[2], kpiCards[3], kpiCards[6]].map((kpi, index) => {
-              const Icon = kpi.icon
-              const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
-              
-              return (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
-                          <Icon className={`h-6 w-6 ${kpi.color}`} />
+            <TabsContent value="operational" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
+                {[kpiCards[2], kpiCards[3], kpiCards[6]].map((kpi: any, index: number) => {
+                  const Icon = kpi.icon
+                  const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
+                  
+                  return (
+                    <Card key={index} className="hover:shadow-lg transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
+                              <Icon className={`h-6 w-6 ${kpi.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
+                              <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
+                              <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                          <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-                          <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                        <div className="mt-4 flex items-center">
+                          <TrendIcon className={`h-4 w-4 mr-1 ${
+                            kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                          }`} />
+                          <span className={`text-sm font-medium ${
+                            kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {kpi.change}
+                          </span>
+                          <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
                         </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center">
-                      <TrendIcon className={`h-4 w-4 mr-1 ${
-                        kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                      }`} />
-                      <span className={`text-sm font-medium ${
-                        kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {kpi.change}
-                      </span>
-                      <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </TabsContent>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </TabsContent>
 
-        <TabsContent value="satisfaction" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[kpiCards[7]].map((kpi, index) => {
-              const Icon = kpi.icon
-              const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
-              
-              return (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
-                          <Icon className={`h-6 w-6 ${kpi.color}`} />
+            <TabsContent value="satisfaction" className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
+                {[kpiCards[7]].map((kpi: any, index: number) => {
+                  const Icon = kpi.icon
+                  const TrendIcon = kpi.trend === 'up' ? TrendingUp : TrendingDown
+                  
+                  return (
+                    <Card key={index} className="hover:shadow-lg transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className={`p-3 rounded-xl ${kpi.bgColor}`}>
+                              <Icon className={`h-6 w-6 ${kpi.color}`} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
+                              <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
+                              <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                          <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
-                          <p className="text-xs text-gray-500 mt-1">{kpi.description}</p>
+                        <div className="mt-4 flex items-center">
+                          <TrendIcon className={`h-4 w-4 mr-1 ${
+                            kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                          }`} />
+                          <span className={`text-sm font-medium ${
+                            kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {kpi.change}
+                          </span>
+                          <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
                         </div>
-                      </div>
-                    </div>
-                    <div className="mt-4 flex items-center">
-                      <TrendIcon className={`h-4 w-4 mr-1 ${
-                        kpi.trend === 'up' ? 'text-green-500' : 'text-red-500'
-                      }`} />
-                      <span className={`text-sm font-medium ${
-                        kpi.trend === 'up' ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {kpi.change}
-                      </span>
-                      <span className="text-sm text-gray-500 ml-1">vs mes anterior</span>
-                    </div>
-                  </CardContent>
-                </Card>
-              )
-            })}
-          </div>
-        </TabsContent>
-      </Tabs>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Quick Actions */}
-        <div className="lg:col-span-1">
+        {/* Right Side - Quick Actions and Notifications */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Quick Actions */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
@@ -463,7 +501,7 @@ export function DashboardPage() {
               <CardDescription>Accesos directos a funciones principales</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {quickActions.map((action, index) => {
+              {quickActions.map((action: any, index: number) => {
                 const Icon = action.icon
                 return (
                   <Button
@@ -479,10 +517,8 @@ export function DashboardPage() {
               })}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Notifications Center */}
-        <div className="lg:col-span-1">
+          {/* Notifications Center */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
@@ -495,7 +531,7 @@ export function DashboardPage() {
               <CardDescription>Alertas y eventos recientes</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 max-h-80 overflow-y-auto">
-              {notifications.map((notification) => {
+              {notifications.map((notification: any) => {
                 const Icon = getNotificationIcon(notification.type)
                 return (
                   <div key={notification.id} className="flex items-start space-x-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors">
@@ -512,10 +548,8 @@ export function DashboardPage() {
               })}
             </CardContent>
           </Card>
-        </div>
 
-        {/* Equipment Usage */}
-        <div className="lg:col-span-2">
+          {/* Equipment Usage */}
           <Card>
             <CardHeader>
               <CardTitle>Uso de Equipamiento</CardTitle>
@@ -523,7 +557,7 @@ export function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {equipmentUsage.map((item, index) => (
+                {equipmentUsage.map((item: any, index: number) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <Dumbbell className="h-5 w-5 text-gray-400" />
@@ -618,7 +652,7 @@ export function DashboardPage() {
                   dataKey="value"
                   label={({ name, value }) => `${name}: ${value}%`}
                 >
-                  {membershipDistribution.map((entry, index) => (
+                  {membershipDistribution.map((entry: any, index: number) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { devtools, persist } from 'zustand/middleware'
-import { ExercisesService } from '../api/services/exercises'
+import { exercisesService } from '../api/services/exercises'
 import {
   Exercise,
   ExerciseCategory,
@@ -113,7 +113,7 @@ export const useExerciseStore = create<ExerciseState>()(
         getExercises: async (params?: ExerciseSearchParams) => {
           set({ loading: true, error: null })
           try {
-            const response = await ExercisesService.getExercises(params)
+            const response = await exercisesService.getExercises(params)
             set({
               exercises: response.items,
               pagination: {
@@ -135,7 +135,7 @@ export const useExerciseStore = create<ExerciseState>()(
         getExercise: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const exercise = await ExercisesService.getExercise(id)
+            const exercise = await exercisesService.getExercise(id)
             set({ currentExercise: exercise, loading: false })
           } catch (error: any) {
             set({ 
@@ -148,7 +148,7 @@ export const useExerciseStore = create<ExerciseState>()(
         createExercise: async (exerciseData: CreateExerciseRequest) => {
           set({ loading: true, error: null })
           try {
-            const newExercise = await ExercisesService.createExercise(exerciseData)
+            const newExercise = await exercisesService.createExercise(exerciseData)
             const { exercises } = get()
             set({ 
               exercises: [newExercise, ...exercises],
@@ -167,7 +167,7 @@ export const useExerciseStore = create<ExerciseState>()(
         updateExercise: async (id: number, exerciseData: UpdateExerciseRequest) => {
           set({ loading: true, error: null })
           try {
-            const updatedExercise = await ExercisesService.updateExercise(id, exerciseData)
+            const updatedExercise = await exercisesService.updateExercise(id, exerciseData)
             const { exercises, currentExercise } = get()
             set({ 
               exercises: exercises.map(exercise => exercise.id === id ? updatedExercise : exercise),
@@ -187,7 +187,7 @@ export const useExerciseStore = create<ExerciseState>()(
         deleteExercise: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ExercisesService.deleteExercise(id)
+            await exercisesService.deleteExercise(id)
             const { exercises } = get()
             set({ 
               exercises: exercises.filter(exercise => exercise.id !== id),
@@ -206,7 +206,7 @@ export const useExerciseStore = create<ExerciseState>()(
         toggleExerciseStatus: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedExercise = await ExercisesService.toggleExerciseStatus(id)
+            const updatedExercise = await exercisesService.toggleExerciseStatus(id)
             const { exercises } = get()
             set({ 
               exercises: exercises.map(exercise => exercise.id === id ? updatedExercise : exercise),
@@ -226,7 +226,7 @@ export const useExerciseStore = create<ExerciseState>()(
         getCategories: async () => {
           set({ loading: true, error: null })
           try {
-            const categories = await ExercisesService.getExerciseCategories()
+            const categories = await exercisesService.getExerciseCategories()
             set({ categories, loading: false })
           } catch (error: any) {
             set({ 
@@ -239,7 +239,7 @@ export const useExerciseStore = create<ExerciseState>()(
         createCategory: async (data) => {
           set({ loading: true, error: null })
           try {
-            const newCategory = await ExercisesService.createExerciseCategory(data)
+            const newCategory = await exercisesService.createExerciseCategory(data)
             const { categories } = get()
             set({ 
               categories: [newCategory, ...categories],
@@ -258,7 +258,7 @@ export const useExerciseStore = create<ExerciseState>()(
         updateCategory: async (id: number, data) => {
           set({ loading: true, error: null })
           try {
-            const updatedCategory = await ExercisesService.updateExerciseCategory(id, data)
+            const updatedCategory = await exercisesService.updateExerciseCategory(id, data)
             const { categories } = get()
             set({ 
               categories: categories.map(category => category.id === id ? updatedCategory : category),
@@ -277,7 +277,7 @@ export const useExerciseStore = create<ExerciseState>()(
         deleteCategory: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ExercisesService.deleteExerciseCategory(id)
+            await exercisesService.deleteExerciseCategory(id)
             const { categories } = get()
             set({ 
               categories: categories.filter(category => category.id !== id),
@@ -297,7 +297,7 @@ export const useExerciseStore = create<ExerciseState>()(
         getMuscleGroups: async () => {
           set({ loading: true, error: null })
           try {
-            const muscleGroups = await ExercisesService.getMuscleGroups()
+            const muscleGroups = await exercisesService.getMuscleGroups()
             set({ muscleGroups, loading: false })
           } catch (error: any) {
             set({ 
@@ -310,7 +310,7 @@ export const useExerciseStore = create<ExerciseState>()(
         createMuscleGroup: async (data) => {
           set({ loading: true, error: null })
           try {
-            const newMuscleGroup = await ExercisesService.createMuscleGroup(data)
+            const newMuscleGroup = await exercisesService.createMuscleGroup(data)
             const { muscleGroups } = get()
             set({ 
               muscleGroups: [newMuscleGroup, ...muscleGroups],
@@ -329,7 +329,7 @@ export const useExerciseStore = create<ExerciseState>()(
         updateMuscleGroup: async (id: number, data) => {
           set({ loading: true, error: null })
           try {
-            const updatedMuscleGroup = await ExercisesService.updateMuscleGroup(id, data)
+            const updatedMuscleGroup = await exercisesService.updateMuscleGroup(id, data)
             const { muscleGroups } = get()
             set({ 
               muscleGroups: muscleGroups.map(group => group.id === id ? updatedMuscleGroup : group),
@@ -348,7 +348,7 @@ export const useExerciseStore = create<ExerciseState>()(
         deleteMuscleGroup: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ExercisesService.deleteMuscleGroup(id)
+            await exercisesService.deleteMuscleGroup(id)
             const { muscleGroups } = get()
             set({ 
               muscleGroups: muscleGroups.filter(group => group.id !== id),
@@ -368,7 +368,7 @@ export const useExerciseStore = create<ExerciseState>()(
         getEquipment: async () => {
           set({ loading: true, error: null })
           try {
-            const equipment = await ExercisesService.getEquipment()
+            const equipment = await exercisesService.getEquipment()
             set({ equipment, loading: false })
           } catch (error: any) {
             set({ 
@@ -381,7 +381,7 @@ export const useExerciseStore = create<ExerciseState>()(
         createEquipment: async (data) => {
           set({ loading: true, error: null })
           try {
-            const newEquipment = await ExercisesService.createEquipment(data)
+            const newEquipment = await exercisesService.createEquipment(data)
             const { equipment } = get()
             set({ 
               equipment: [newEquipment, ...equipment],
@@ -400,7 +400,7 @@ export const useExerciseStore = create<ExerciseState>()(
         updateEquipment: async (id: number, data) => {
           set({ loading: true, error: null })
           try {
-            const updatedEquipment = await ExercisesService.updateEquipment(id, data)
+            const updatedEquipment = await exercisesService.updateEquipment(id, data)
             const { equipment } = get()
             set({ 
               equipment: equipment.map(item => item.id === id ? updatedEquipment : item),
@@ -419,7 +419,7 @@ export const useExerciseStore = create<ExerciseState>()(
         deleteEquipment: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ExercisesService.deleteEquipment(id)
+            await exercisesService.deleteEquipment(id)
             const { equipment } = get()
             set({ 
               equipment: equipment.filter(item => item.id !== id),
@@ -439,7 +439,7 @@ export const useExerciseStore = create<ExerciseState>()(
         getWorkouts: async (params?) => {
           set({ loading: true, error: null })
           try {
-            const response = await ExercisesService.getWorkouts(params)
+            const response = await exercisesService.getWorkouts(params)
             set({ workouts: response.items, loading: false })
           } catch (error: any) {
             set({ 
@@ -452,7 +452,7 @@ export const useExerciseStore = create<ExerciseState>()(
         getWorkout: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const workout = await ExercisesService.getWorkout(id)
+            const workout = await exercisesService.getWorkout(id)
             set({ currentWorkout: workout, loading: false })
           } catch (error: any) {
             set({ 
@@ -465,7 +465,7 @@ export const useExerciseStore = create<ExerciseState>()(
         createWorkout: async (workoutData: CreateWorkoutRequest) => {
           set({ loading: true, error: null })
           try {
-            const newWorkout = await ExercisesService.createWorkout(workoutData)
+            const newWorkout = await exercisesService.createWorkout(workoutData)
             const { workouts } = get()
             set({ 
               workouts: [newWorkout, ...workouts],
@@ -484,7 +484,7 @@ export const useExerciseStore = create<ExerciseState>()(
         updateWorkout: async (id: number, workoutData: Partial<CreateWorkoutRequest>) => {
           set({ loading: true, error: null })
           try {
-            const updatedWorkout = await ExercisesService.updateWorkout(id, workoutData)
+            const updatedWorkout = await exercisesService.updateWorkout(id, workoutData)
             const { workouts, currentWorkout } = get()
             set({ 
               workouts: workouts.map(workout => workout.id === id ? updatedWorkout : workout),
@@ -504,7 +504,7 @@ export const useExerciseStore = create<ExerciseState>()(
         deleteWorkout: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            await ExercisesService.deleteWorkout(id)
+            await exercisesService.deleteWorkout(id)
             const { workouts } = get()
             set({ 
               workouts: workouts.filter(workout => workout.id !== id),
@@ -523,7 +523,7 @@ export const useExerciseStore = create<ExerciseState>()(
         startWorkout: async (id: number) => {
           set({ loading: true, error: null })
           try {
-            const updatedWorkout = await ExercisesService.startWorkout(id)
+            const updatedWorkout = await exercisesService.startWorkout(id)
             const { workouts } = get()
             set({ 
               workouts: workouts.map(workout => workout.id === id ? updatedWorkout : workout),

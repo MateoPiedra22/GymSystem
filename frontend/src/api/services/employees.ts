@@ -33,31 +33,31 @@ import {
 
 export class EmployeesService {
   // Employees
-  static async getEmployees(params?: EmployeeSearchParams): Promise<EmployeeListResponse> {
+  async getEmployees(params?: EmployeeSearchParams): Promise<EmployeeListResponse> {
     return apiClient.get(API_ENDPOINTS.EMPLOYEES.EMPLOYEES, { params })
   }
 
-  static async getEmployee(id: number): Promise<Employee> {
+  async getEmployee(id: number): Promise<Employee> {
     return apiClient.get(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/${id}`)
   }
 
-  static async createEmployee(data: CreateEmployeeRequest): Promise<Employee> {
+  async createEmployee(data: CreateEmployeeRequest): Promise<Employee> {
     return apiClient.post(API_ENDPOINTS.EMPLOYEES.EMPLOYEES, data)
   }
 
-  static async updateEmployee(id: number, data: UpdateEmployeeRequest): Promise<Employee> {
+  async updateEmployee(id: number, data: UpdateEmployeeRequest): Promise<Employee> {
     return apiClient.put(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/${id}`, data)
   }
 
-  static async deleteEmployee(id: number): Promise<void> {
+  async deleteEmployee(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/${id}`)
   }
 
-  static async toggleEmployeeStatus(id: number): Promise<Employee> {
+  async toggleEmployeeStatus(id: number): Promise<Employee> {
     return apiClient.patch(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/${id}/toggle-status`)
   }
 
-  static async terminateEmployee(id: number, data: {
+  async terminateEmployee(id: number, data: {
     termination_date: string
     reason: string
     final_pay_amount?: number
@@ -67,7 +67,7 @@ export class EmployeesService {
     return apiClient.patch(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/${id}/terminate`, data)
   }
 
-  static async rehireEmployee(id: number, data: {
+  async rehireEmployee(id: number, data: {
     rehire_date: string
     position_id: number
     department_id: number
@@ -78,11 +78,11 @@ export class EmployeesService {
   }
 
   // Departments
-  static async getDepartments(): Promise<Department[]> {
+  async getDepartments(): Promise<Department[]> {
     return apiClient.get(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/departments`)
   }
 
-  static async createDepartment(data: {
+  async createDepartment(data: {
     name: string
     description: string
     manager_id?: number
@@ -92,7 +92,7 @@ export class EmployeesService {
     return apiClient.post(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/departments`, data)
   }
 
-  static async updateDepartment(id: number, data: {
+  async updateDepartment(id: number, data: {
     name?: string
     description?: string
     manager_id?: number
@@ -103,16 +103,16 @@ export class EmployeesService {
     return apiClient.put(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/departments/${id}`, data)
   }
 
-  static async deleteDepartment(id: number): Promise<void> {
+  async deleteDepartment(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/departments/${id}`)
   }
 
   // Positions
-  static async getPositions(): Promise<Position[]> {
+  async getPositions(): Promise<Position[]> {
     return apiClient.get(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/positions`)
   }
 
-  static async createPosition(data: {
+  async createPosition(data: {
     title: string
     description: string
     department_id: number
@@ -124,7 +124,7 @@ export class EmployeesService {
     return apiClient.post(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/positions`, data)
   }
 
-  static async updatePosition(id: number, data: {
+  async updatePosition(id: number, data: {
     title?: string
     description?: string
     department_id?: number
@@ -137,19 +137,19 @@ export class EmployeesService {
     return apiClient.put(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/positions/${id}`, data)
   }
 
-  static async deletePosition(id: number): Promise<void> {
+  async deletePosition(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/positions/${id}`)
   }
 
   // Certifications
-  static async getCertifications(employeeId?: number): Promise<Certification[]> {
+  async getCertifications(employeeId?: number): Promise<Certification[]> {
     const endpoint = employeeId 
       ? `${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/${employeeId}/certifications`
       : `${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/certifications`
     return apiClient.get(endpoint)
   }
 
-  static async createCertification(data: {
+  async createCertification(data: {
     employee_id: number
     name: string
     issuing_organization: string
@@ -175,7 +175,7 @@ export class EmployeesService {
     return response.data.data
   }
 
-  static async updateCertification(id: number, data: {
+  async updateCertification(id: number, data: {
     name?: string
     issuing_organization?: string
     issue_date?: string
@@ -201,7 +201,7 @@ export class EmployeesService {
     return response.data.data
   }
 
-  static async deleteCertification(id: number): Promise<void> {
+  async deleteCertification(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.EMPLOYEES.EMPLOYEES}/certifications/${id}`)
   }
 
@@ -466,4 +466,4 @@ export class EmployeesService {
   }
 }
 
-export const employeesService = EmployeesService
+export const employeesService = new EmployeesService()

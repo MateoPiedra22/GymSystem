@@ -60,39 +60,7 @@
 }
 
 @layer components {
-  /* Radix UI Tabs horizontal layout override */
-  [data-orientation="horizontal"] {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 1.5rem !important;
-    width: 100% !important;
-  }
-  
-  [data-orientation="horizontal"] > [role="tablist"] {
-    flex-shrink: 0 !important;
-    width: auto !important;
-    min-width: 12rem !important;
-  }
-  
-  [data-orientation="horizontal"] > [role="tabpanel"] {
-    flex: 1 !important;
-    width: 100% !important;
-  }
-  
-  /* Additional fallback selectors */
-  .w-full[data-orientation="horizontal"] {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 1.5rem !important;
-  }
-  
-  .w-full[data-orientation="horizontal"] > * {
-    flex-shrink: 0;
-  }
-  
-  .w-full[data-orientation="horizontal"] > [role="tabpanel"] {
-    flex: 1 !important;
-  }
+  /* Radix UI Tabs - removed problematic horizontal layout overrides */
 
   /* Custom scrollbar */
   .custom-scrollbar {

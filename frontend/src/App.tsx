@@ -18,6 +18,7 @@ import ExercisesPage from './pages/exercises/ExercisesPage'
 import EmployeesPage from './pages/employees/EmployeesPage'
 import CommunityPage from './pages/community/CommunityPage'
 import ConfigurationPage from './pages/configuration/ConfigurationPage'
+import ConnectionTest from './pages/ConnectionTest'
 import NotFoundPage from './pages/NotFoundPage'
 
 // Protected Route Component
@@ -133,6 +134,16 @@ function App() {
                   <LoginPage />
                 </PageErrorBoundary>
               </PublicRoute>
+            }
+          />
+          
+          {/* Connection Test Route - Public for testing */}
+          <Route
+            path="/connection-test"
+            element={
+              <PageErrorBoundary>
+                <ConnectionTest />
+              </PageErrorBoundary>
             }
           />
 

@@ -20,7 +20,7 @@ from ..schemas.class_schema import (
     ClassFilter, ClassSchedule, RecurringClassCreate, WaitlistResponse
 )
 
-router = APIRouter(prefix="/classes", tags=["Classes"])
+router = APIRouter(tags=["Classes"])
 
 @router.get("/", response_model=ClassList)
 async def get_classes(

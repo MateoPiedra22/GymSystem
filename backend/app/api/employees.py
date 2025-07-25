@@ -17,7 +17,7 @@ from ..schemas.employee import (
     EmployeeFilter, PayrollSummary, PerformanceReview
 )
 
-router = APIRouter(prefix="/employees", tags=["Employees"])
+router = APIRouter(tags=["Employees"])
 
 @router.get("/", response_model=EmployeeList)
 async def get_employees(

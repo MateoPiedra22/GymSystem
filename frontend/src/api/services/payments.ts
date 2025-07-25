@@ -22,42 +22,42 @@ import {
 
 export class PaymentsService {
   // Payments
-  static async getPayments(params?: PaymentSearchParams): Promise<PaymentListResponse> {
+  async getPayments(params?: PaymentSearchParams): Promise<PaymentListResponse> {
     return apiClient.get(API_ENDPOINTS.PAYMENTS.PAYMENTS, { params })
   }
 
-  static async getPayment(id: number): Promise<Payment> {
+  async getPayment(id: number): Promise<Payment> {
     return apiClient.get(`${API_ENDPOINTS.PAYMENTS.PAYMENTS}/${id}`)
   }
 
-  static async createPayment(data: CreatePaymentRequest): Promise<Payment> {
+  async createPayment(data: CreatePaymentRequest): Promise<Payment> {
     return apiClient.post(API_ENDPOINTS.PAYMENTS.PAYMENTS, data)
   }
 
-  static async processPayment(data: ProcessPaymentRequest): Promise<Payment> {
+  async processPayment(data: ProcessPaymentRequest): Promise<Payment> {
     return apiClient.post(`${API_ENDPOINTS.PAYMENTS.PAYMENTS}/process`, data)
   }
 
-  static async refundPayment(data: RefundPaymentRequest): Promise<Payment> {
+  async refundPayment(data: RefundPaymentRequest): Promise<Payment> {
     return apiClient.post(`${API_ENDPOINTS.PAYMENTS.PAYMENTS}/refund`, data)
   }
 
-  static async cancelPayment(id: number, reason?: string): Promise<Payment> {
+  async cancelPayment(id: number, reason?: string): Promise<Payment> {
     return apiClient.patch(`${API_ENDPOINTS.PAYMENTS.PAYMENTS}/${id}/cancel`, { reason })
   }
 
   // Payment Methods
-  static async getPaymentMethods(userId?: number): Promise<PaymentMethodListResponse> {
+  async getPaymentMethods(userId?: number): Promise<PaymentMethodListResponse> {
     return apiClient.get(API_ENDPOINTS.PAYMENTS.PAYMENT_METHODS, {
       params: userId ? { user_id: userId } : undefined
     })
   }
 
-  static async getPaymentMethod(id: number): Promise<PaymentMethod> {
+  async getPaymentMethod(id: number): Promise<PaymentMethod> {
     return apiClient.get(`${API_ENDPOINTS.PAYMENTS.PAYMENT_METHODS}/${id}`)
   }
 
-  static async addPaymentMethod(data: {
+  async addPaymentMethod(data: {
     user_id: number
     type: string
     token: string
@@ -66,23 +66,23 @@ export class PaymentsService {
     return apiClient.post(API_ENDPOINTS.PAYMENTS.PAYMENT_METHODS, data)
   }
 
-  static async updatePaymentMethod(id: number, data: {
+  async updatePaymentMethod(id: number, data: {
     is_default?: boolean
     is_active?: boolean
   }): Promise<PaymentMethod> {
     return apiClient.put(`${API_ENDPOINTS.PAYMENTS.PAYMENT_METHODS}/${id}`, data)
   }
 
-  static async deletePaymentMethod(id: number): Promise<void> {
+  async deletePaymentMethod(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.PAYMENTS.PAYMENT_METHODS}/${id}`)
   }
 
-  static async setDefaultPaymentMethod(id: number): Promise<PaymentMethod> {
+  async setDefaultPaymentMethod(id: number): Promise<PaymentMethod> {
     return apiClient.patch(`${API_ENDPOINTS.PAYMENTS.PAYMENT_METHODS}/${id}/set-default`)
   }
 
   // Payment Statistics
-  static async getPaymentStatistics(params?: {
+  async getPaymentStatistics(params?: {
     start_date?: string
     end_date?: string
     user_id?: number
@@ -91,34 +91,34 @@ export class PaymentsService {
   }
 
   // Invoices
-  static async getInvoices(params?: PaginationParams): Promise<InvoiceListResponse> {
+  async getInvoices(params?: PaginationParams): Promise<InvoiceListResponse> {
     return apiClient.get(API_ENDPOINTS.PAYMENTS.INVOICES, { params })
   }
 
-  static async getInvoice(id: number): Promise<Invoice> {
+  async getInvoice(id: number): Promise<Invoice> {
     return apiClient.get(`${API_ENDPOINTS.PAYMENTS.INVOICES}/${id}`)
   }
 
-  static async createInvoice(data: CreateInvoiceRequest): Promise<Invoice> {
+  async createInvoice(data: CreateInvoiceRequest): Promise<Invoice> {
     return apiClient.post(API_ENDPOINTS.PAYMENTS.INVOICES, data)
   }
 
-  static async sendInvoice(id: number): Promise<void> {
+  async sendInvoice(id: number): Promise<void> {
     return apiClient.post(`${API_ENDPOINTS.PAYMENTS.INVOICES}/${id}/send`)
   }
 
-  static async markInvoiceAsPaid(id: number, paymentId?: number): Promise<Invoice> {
+  async markInvoiceAsPaid(id: number, paymentId?: number): Promise<Invoice> {
     return apiClient.patch(`${API_ENDPOINTS.PAYMENTS.INVOICES}/${id}/mark-paid`, {
       payment_id: paymentId
     })
   }
 
-  static async downloadInvoice(id: number): Promise<Blob> {
+  async downloadInvoice(id: number): Promise<Blob> {
     return apiClient.downloadFile(`${API_ENDPOINTS.PAYMENTS.INVOICES}/${id}/download`)
   }
 
   // Payment Intents (for Stripe integration)
-  static async createPaymentIntent(data: {
+  async createPaymentIntent(data: {
     amount: number
     currency: string
     payment_method_types: string[]
@@ -127,7 +127,7 @@ export class PaymentsService {
     return apiClient.post(`${API_ENDPOINTS.PAYMENTS.PAYMENTS}/create-intent`, data)
   }
 
-  static async confirmPaymentIntent(intentId: string, data?: {
+  async confirmPaymentIntent(intentId: string, data?: {
     payment_method?: string
     return_url?: string
   }): Promise<PaymentIntent> {
@@ -135,15 +135,15 @@ export class PaymentsService {
   }
 
   // Subscriptions
-  static async getSubscriptions(params?: PaginationParams): Promise<SubscriptionListResponse> {
+  async getSubscriptions(params?: PaginationParams): Promise<SubscriptionListResponse> {
     return apiClient.get(API_ENDPOINTS.PAYMENTS.SUBSCRIPTIONS, { params })
   }
 
-  static async getSubscription(id: number): Promise<Subscription> {
+  async getSubscription(id: number): Promise<Subscription> {
     return apiClient.get(`${API_ENDPOINTS.PAYMENTS.SUBSCRIPTIONS}/${id}`)
   }
 
-  static async createSubscription(data: {
+  async createSubscription(data: {
     user_id: number
     plan_id: number
     payment_method_id?: number
@@ -152,28 +152,28 @@ export class PaymentsService {
     return apiClient.post(API_ENDPOINTS.PAYMENTS.SUBSCRIPTIONS, data)
   }
 
-  static async cancelSubscription(id: number, data?: {
+  async cancelSubscription(id: number, data?: {
     cancel_at_period_end?: boolean
     reason?: string
   }): Promise<Subscription> {
     return apiClient.patch(`${API_ENDPOINTS.PAYMENTS.SUBSCRIPTIONS}/${id}/cancel`, data)
   }
 
-  static async reactivateSubscription(id: number): Promise<Subscription> {
+  async reactivateSubscription(id: number): Promise<Subscription> {
     return apiClient.patch(`${API_ENDPOINTS.PAYMENTS.SUBSCRIPTIONS}/${id}/reactivate`)
   }
 
   // Subscription Plans
-  static async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
+  async getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
     return apiClient.get(`${API_ENDPOINTS.PAYMENTS.SUBSCRIPTIONS}/plans`)
   }
 
-  static async getSubscriptionPlan(id: number): Promise<SubscriptionPlan> {
+  async getSubscriptionPlan(id: number): Promise<SubscriptionPlan> {
     return apiClient.get(`${API_ENDPOINTS.PAYMENTS.SUBSCRIPTIONS}/plans/${id}`)
   }
 
   // Bulk Operations
-  static async bulkProcessPayments(paymentIds: number[]): Promise<{
+  async bulkProcessPayments(paymentIds: number[]): Promise<{
     successful: number
     failed: number
     errors: Array<{ payment_id: number; error: string }>
@@ -183,7 +183,7 @@ export class PaymentsService {
     })
   }
 
-  static async bulkRefundPayments(data: {
+  async bulkRefundPayments(data: {
     payment_ids: number[]
     reason: string
     amount?: number
@@ -196,12 +196,12 @@ export class PaymentsService {
   }
 
   // Export/Import
-  static async exportPayments(params?: PaymentSearchParams): Promise<Blob> {
+  async exportPayments(params?: PaymentSearchParams): Promise<Blob> {
     return apiClient.downloadFile(`${API_ENDPOINTS.PAYMENTS.PAYMENTS}/export`, { params })
   }
 
   // Reports
-  static async getPaymentReport(params: {
+  async getPaymentReport(params: {
     start_date: string
     end_date: string
     group_by?: 'day' | 'week' | 'month'
@@ -221,9 +221,9 @@ export class PaymentsService {
   }
 
   // Webhooks (for payment provider notifications)
-  static async handleWebhook(provider: string, data: any): Promise<void> {
+  async handleWebhook(provider: string, data: any): Promise<void> {
     return apiClient.post(`${API_ENDPOINTS.PAYMENTS.PAYMENTS}/webhook/${provider}`, data)
   }
 }
 
-export const paymentsService = PaymentsService
+export const paymentsService = new PaymentsService()

@@ -16,70 +16,70 @@ import {
 
 export class MembershipsService {
   // Membership Plans
-  static async getMembershipPlans(params?: PaginationParams): Promise<MembershipPlanListResponse> {
+  async getMembershipPlans(params?: PaginationParams): Promise<MembershipPlanListResponse> {
     return apiClient.get(API_ENDPOINTS.MEMBERSHIPS.PLANS, { params })
   }
 
-  static async getMembershipPlan(id: number): Promise<MembershipPlan> {
+  async getMembershipPlan(id: number): Promise<MembershipPlan> {
     return apiClient.get(`${API_ENDPOINTS.MEMBERSHIPS.PLANS}/${id}`)
   }
 
-  static async createMembershipPlan(data: CreateMembershipPlanRequest): Promise<MembershipPlan> {
+  async createMembershipPlan(data: CreateMembershipPlanRequest): Promise<MembershipPlan> {
     return apiClient.post(API_ENDPOINTS.MEMBERSHIPS.PLANS, data)
   }
 
-  static async updateMembershipPlan(id: number, data: UpdateMembershipPlanRequest): Promise<MembershipPlan> {
+  async updateMembershipPlan(id: number, data: UpdateMembershipPlanRequest): Promise<MembershipPlan> {
     return apiClient.put(`${API_ENDPOINTS.MEMBERSHIPS.PLANS}/${id}`, data)
   }
 
-  static async deleteMembershipPlan(id: number): Promise<void> {
+  async deleteMembershipPlan(id: number): Promise<void> {
     return apiClient.delete(`${API_ENDPOINTS.MEMBERSHIPS.PLANS}/${id}`)
   }
 
-  static async toggleMembershipPlanStatus(id: number): Promise<MembershipPlan> {
+  async toggleMembershipPlanStatus(id: number): Promise<MembershipPlan> {
     return apiClient.patch(`${API_ENDPOINTS.MEMBERSHIPS.PLANS}/${id}/toggle-status`)
   }
 
   // User Memberships
-  static async getUserMemberships(params?: MembershipSearchParams): Promise<MembershipListResponse> {
+  async getUserMemberships(params?: MembershipSearchParams): Promise<MembershipListResponse> {
     return apiClient.get(API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS, { params })
   }
 
-  static async getUserMembership(id: number): Promise<UserMembership> {
+  async getUserMembership(id: number): Promise<UserMembership> {
     return apiClient.get(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/${id}`)
   }
 
-  static async assignMembership(data: AssignMembershipRequest): Promise<UserMembership> {
+  async assignMembership(data: AssignMembershipRequest): Promise<UserMembership> {
     return apiClient.post(API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS, data)
   }
 
-  static async cancelMembership(id: number, reason?: string): Promise<UserMembership> {
+  async cancelMembership(id: number, reason?: string): Promise<UserMembership> {
     return apiClient.patch(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/${id}/cancel`, { reason })
   }
 
-  static async suspendMembership(id: number, reason?: string): Promise<UserMembership> {
+  async suspendMembership(id: number, reason?: string): Promise<UserMembership> {
     return apiClient.patch(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/${id}/suspend`, { reason })
   }
 
-  static async reactivateMembership(id: number): Promise<UserMembership> {
+  async reactivateMembership(id: number): Promise<UserMembership> {
     return apiClient.patch(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/${id}/reactivate`)
   }
 
-  static async renewMembership(id: number): Promise<UserMembership> {
+  async renewMembership(id: number): Promise<UserMembership> {
     return apiClient.post(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/${id}/renew`)
   }
 
   // Membership Statistics
-  static async getMembershipStatistics(): Promise<MembershipStatistics> {
+  async getMembershipStatistics(): Promise<MembershipStatistics> {
     return apiClient.get(API_ENDPOINTS.MEMBERSHIPS.STATISTICS)
   }
 
-  static async getMembershipUsage(membershipId: number): Promise<MembershipUsage> {
+  async getMembershipUsage(membershipId: number): Promise<MembershipUsage> {
     return apiClient.get(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/${membershipId}/usage`)
   }
 
   // Bulk Operations
-  static async bulkAssignMemberships(data: {
+  async bulkAssignMemberships(data: {
     user_ids: number[]
     membership_plan_id: number
     start_date: string
@@ -88,7 +88,7 @@ export class MembershipsService {
     return apiClient.post(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/bulk-assign`, data)
   }
 
-  static async bulkCancelMemberships(data: {
+  async bulkCancelMemberships(data: {
     membership_ids: number[]
     reason?: string
   }): Promise<void> {
@@ -96,11 +96,11 @@ export class MembershipsService {
   }
 
   // Export/Import
-  static async exportMemberships(params?: MembershipSearchParams): Promise<Blob> {
+  async exportMemberships(params?: MembershipSearchParams): Promise<Blob> {
     return apiClient.downloadFile(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/export`, { params })
   }
 
-  static async importMemberships(file: File): Promise<{
+  async importMemberships(file: File): Promise<{
     successful: number
     failed: number
     errors: Array<{ row: number; error: string }>
@@ -109,17 +109,17 @@ export class MembershipsService {
   }
 
   // Membership Renewals
-  static async getExpiringMemberships(days?: number): Promise<UserMembership[]> {
+  async getExpiringMemberships(days?: number): Promise<UserMembership[]> {
     return apiClient.get(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/expiring`, {
       params: { days: days || 30 }
     })
   }
 
-  static async sendRenewalReminders(membershipIds: number[]): Promise<void> {
+  async sendRenewalReminders(membershipIds: number[]): Promise<void> {
     return apiClient.post(`${API_ENDPOINTS.MEMBERSHIPS.USER_MEMBERSHIPS}/send-renewal-reminders`, {
       membership_ids: membershipIds
     })
   }
 }
 
-export const membershipsService = MembershipsService
+export const membershipsService = new MembershipsService()

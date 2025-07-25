@@ -16,7 +16,7 @@ from ..schemas.user import (
 )
 from ..schemas.membership import MembershipResponse
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(tags=["Users"])
 
 @router.get("/", response_model=UserList)
 async def get_users(

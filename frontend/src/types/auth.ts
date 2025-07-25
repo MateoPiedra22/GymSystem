@@ -18,9 +18,8 @@ export interface User {
 }
 
 export interface LoginRequest {
-  role: 'owner' | 'trainer'
+  email: string
   password: string
-  trainer_id?: number // Only for trainer login
 }
 
 export interface LoginResponse {

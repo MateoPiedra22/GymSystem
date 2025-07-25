@@ -64,38 +64,40 @@ import {
   Line
 } from 'recharts'
 
-// Mock data for charts and analytics
-const revenueData = [
-  { month: 'Ene', revenue: 45000, target: 50000, payments: 120 },
-  { month: 'Feb', revenue: 52000, target: 50000, payments: 135 },
-  { month: 'Mar', revenue: 48000, target: 50000, payments: 128 },
-  { month: 'Abr', revenue: 61000, target: 55000, payments: 142 },
-  { month: 'May', revenue: 55000, target: 55000, payments: 138 }
-]
-
-const paymentMethodData = [
-  { name: 'Tarjeta de Crédito', value: 45, color: '#3b82f6' },
-  { name: 'Efectivo', value: 30, color: '#10b981' },
-  { name: 'Transferencia', value: 20, color: '#f59e0b' },
-  { name: 'Débito Automático', value: 5, color: '#ef4444' }
-]
-
-const membershipRevenueData = [
-  { type: 'Premium Mensual', revenue: 180000, count: 45 },
-  { type: 'Básico Estudiante', revenue: 120000, count: 80 },
-  { type: 'Funcional Semanal', revenue: 95000, count: 35 },
-  { type: 'Diaria', revenue: 45000, count: 150 }
-]
-
-const paymentTrendsData = [
-  { day: 'Lun', completed: 25, pending: 8, overdue: 3 },
-  { day: 'Mar', completed: 32, pending: 12, overdue: 2 },
-  { day: 'Mié', completed: 28, pending: 15, overdue: 5 },
-  { day: 'Jue', completed: 35, pending: 10, overdue: 4 },
-  { day: 'Vie', completed: 42, pending: 18, overdue: 6 },
-  { day: 'Sáb', completed: 38, pending: 22, overdue: 8 },
-  { day: 'Dom', completed: 20, pending: 14, overdue: 3 }
-]
+// Payment analytics data will be fetched from backend
+const getPaymentAnalytics = async () => {
+  // This will be replaced with actual API calls to payment statistics endpoints
+  return {
+    revenueData: [
+      { month: 'Ene', revenue: 15000, target: 18000 },
+      { month: 'Feb', revenue: 18000, target: 18000 },
+      { month: 'Mar', revenue: 16500, target: 18000 },
+      { month: 'Abr', revenue: 20000, target: 18000 },
+      { month: 'May', revenue: 22000, target: 18000 },
+      { month: 'Jun', revenue: 25000, target: 18000 }
+    ],
+    paymentMethodData: [
+      { name: 'Tarjeta de Crédito', value: 60, color: '#3B82F6' },
+      { name: 'Efectivo', value: 25, color: '#10B981' },
+      { name: 'Transferencia', value: 15, color: '#F59E0B' }
+    ],
+    membershipRevenueData: [
+      { type: 'Premium Mensual', revenue: 12000 },
+      { type: 'Básico Estudiante', revenue: 8000 },
+      { type: 'Funcional Semanal', revenue: 5000 },
+      { type: 'Diaria', revenue: 3000 }
+    ],
+    paymentTrendsData: [
+      { day: 'Lun', completed: 45, pending: 12, overdue: 3 },
+      { day: 'Mar', completed: 52, pending: 8, overdue: 2 },
+      { day: 'Mié', completed: 38, pending: 15, overdue: 5 },
+      { day: 'Jue', completed: 48, pending: 10, overdue: 4 },
+      { day: 'Vie', completed: 65, pending: 5, overdue: 1 },
+      { day: 'Sáb', completed: 32, pending: 18, overdue: 7 },
+      { day: 'Dom', completed: 25, pending: 22, overdue: 8 }
+    ]
+  }
+}
 
 interface Payment {
   id: number
@@ -126,6 +128,24 @@ export function PaymentsPage() {
     getPayments,
     paymentStats
   } = usePaymentStore()
+  
+  // Get analytics data
+   const [analyticsData, setAnalyticsData] = useState<any>({
+     revenueData: [],
+     paymentMethodData: [],
+     membershipRevenueData: [],
+     paymentTrendsData: []
+   })
+  
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      const data = await getPaymentAnalytics()
+      setAnalyticsData(data)
+    }
+    loadAnalytics()
+  }, [])
+  
+  const { revenueData, paymentMethodData, membershipRevenueData, paymentTrendsData } = analyticsData
   
   const [filteredPayments, setFilteredPayments] = useState<Payment[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -472,7 +492,7 @@ export function PaymentsPage() {
                       dataKey="value"
                       label={({ name, percent }: { name: string; percent: number }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
-                      {paymentMethodData.map((entry, index) => (
+                      {paymentMethodData.map((entry: any, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>

@@ -7,7 +7,14 @@ settings:
 importers:
 
   .:
+    dependencies:
+      lodash:
+        specifier: ^4.17.21
+        version: 4.17.21
     devDependencies:
+      '@types/lodash':
+        specifier: ^4.17.20
+        version: 4.17.20
       concurrently:
         specifier: ^8.2.2
         version: 8.2.2
@@ -1070,6 +1077,9 @@ packages:
 
   '@types/json-schema@7.0.15':
     resolution: {integrity: sha512-5+fP8P8MFNC+AyZCDxrB2pkZFPGzqQWUzpSeuuVLvm8VMcorNYavBqoFcxK8bQz4Qsbn4oUEEem4wDLfcysGHA==}
+
+  '@types/lodash@4.17.20':
+    resolution: {integrity: sha512-H3MHACvFUEiujabxhaI/ImO6gUrd8oOurg7LQtS7mbwIXA/cUqWrvBsaeJ23aZEPk1TAYkurjfMbSELfoCXlGA==}
 
   '@types/node@24.1.0':
     resolution: {integrity: sha512-ut5FthK5moxFKH2T1CUOC6ctR67rQRvvHdFLCD2Ql6KXmMuCrjsSsRI9UsLCm9M18BMwClv4pn327UvB7eeO1w==}
@@ -3412,6 +3422,8 @@ snapshots:
       hoist-non-react-statics: 3.3.2
 
   '@types/json-schema@7.0.15': {}
+
+  '@types/lodash@4.17.20': {}
 
   '@types/node@24.1.0':
     dependencies:

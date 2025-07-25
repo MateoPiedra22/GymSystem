@@ -12,6 +12,7 @@ export { exercisesService } from './services/exercises'
 export { routinesService } from './services/routines'
 export { classesService } from './services/classes'
 export { employeesService } from './services/employees'
+export { configService } from './services/config'
 
 // Service Types
 export type { LoginResponse, RefreshResponse } from './services/auth'
