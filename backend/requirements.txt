@@ -110,10 +110,9 @@ typing-extensions==4.8.0
 
 # WhatsApp Integration
 twilio==8.10.0
-pywhatkit==5.4
 
 # Instagram Integration
-instagrapi==2.0.0
+instagrapi==2.1.0
 
 # Advanced Image Processing
 opencv-python==4.8.1.78
