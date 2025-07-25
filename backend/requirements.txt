@@ -152,5 +152,8 @@ seaborn==0.13.0
 # API Documentation
 # fastapi-users==12.1.2  # Removed - custom auth implementation
 
+# System Monitoring
+psutil==5.9.6
+
 # Health Checks
 # fastapi-health==0.4.0  # Removed - custom health check
