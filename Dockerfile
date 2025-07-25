@@ -27,10 +27,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Expose port (Railway will set the PORT environment variable)
-EXPOSE ${PORT:-8000}
+EXPOSE 8000
 
 # Make entrypoint script executable
 RUN chmod +x backend/entrypoint.sh
 
+# Make start script executable
+RUN chmod +x start.py
+
 # Command to run the application
-CMD ["sh", "-c", "python -m uvicorn backend.app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+CMD ["python", "start.py"]
