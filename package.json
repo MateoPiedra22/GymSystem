@@ -5,25 +5,23 @@
   "private": true,
   "workspaces": [
     "frontend",
-    "member-app",
     "desktop"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" \"npm run dev:member\"",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:member": "cd member-app && npm run dev",
     "dev:desktop": "cd desktop && npm run tauri dev",
     "build": "npm run build:frontend",
     "build:frontend": "cd frontend && npm run build:prod",
-    "install:all": "npm install && cd frontend && npm install && cd ../member-app && npm install && cd ../desktop && npm install",
+    "install:all": "npm install && cd frontend && npm install && cd ../desktop && npm install",
     "setup:backend": "cd backend && python -m venv venv && .\\venv\\Scripts\\activate && pip install -r requirements.txt",
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "cd frontend && npm run test",
     "test:backend": "cd backend && python -m pytest",
-    "lint": "npm run lint:frontend && npm run lint:member",
-    "lint:frontend": "cd frontend && npm run lint",
-    "lint:member": "cd member-app && npm run lint"
+    "lint": "npm run lint:frontend",
+    "lint:frontend": "cd frontend && npm run lint"
+
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
