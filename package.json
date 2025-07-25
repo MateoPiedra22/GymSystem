@@ -21,9 +21,9 @@
     "test:backend": "cd backend && python -m pytest",
     "lint": "npm run lint:frontend",
     "lint:frontend": "cd frontend && npm run lint"
-
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.20",
     "concurrently": "^8.2.2"
   },
   "engines": {
@@ -46,5 +46,7 @@
   ],
   "author": "GymSystem Team",
   "license": "PROPRIETARY",
-  "dependencies": {}
+  "dependencies": {
+    "lodash": "^4.17.21"
+  }
 }
