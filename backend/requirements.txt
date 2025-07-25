@@ -35,7 +35,7 @@ aiofiles==23.2.1
 
 # Validation and Utilities
 validators==0.22.0
-phonevalidator==1.1.2
+phonenumbers==8.13.26
 
 # Logging and Monitoring
 loguru==0.7.2

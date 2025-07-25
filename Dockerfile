@@ -15,15 +15,13 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Clear pip cache and upgrade pip
-RUN pip cache purge || true
+# Clear pip cache to ensure clean installation
+RUN pip cache purge
 RUN pip install --upgrade pip==25.1.1 setuptools wheel
 
-# Copy requirements and install Python dependencies with verbose output
+# Copy requirements and install Python dependencies
 COPY backend/requirements.txt .
-RUN cat requirements.txt | grep phonevalidator
-RUN pip install --no-cache-dir --force-reinstall --verbose phonevalidator==1.1.2
-RUN pip install --no-cache-dir --force-reinstall -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire project
 COPY . .
