@@ -13,7 +13,7 @@ variables = {
   PROJECT_NAME = "GymSystem",
   DATABASE_URL = "${{ Postgres.DATABASE_URL }}",
   SECRET_KEY = "${{ secrets.SECRET_KEY }}",
-  ALLOWED_ORIGINS = "https://your-frontend-domain.vercel.app,http://localhost:3000,http://localhost:5173"
+  ALLOWED_ORIGINS = "https://gym-system-v6-frontend.vercel.app,http://localhost:3000,http://localhost:5173"
 }
 
 [environments.development]

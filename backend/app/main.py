@@ -13,12 +13,13 @@ from .core.middleware import (
     UserContextMiddleware, APIVersionMiddleware,
     validation_exception_handler, http_exception_handler, general_exception_handler
 )
-from .middleware.audit_middleware import AuditMiddleware, SecurityAuditMiddleware
-from .api import (
-    auth, users, memberships, exercises, routines, 
-    classes, employees, payments, reports
-)
-from .api.v1 import health, config, audit, push_notifications, email, whatsapp, notifications, backup, monitoring, integrations
+# from .middleware.audit_middleware import AuditMiddleware, SecurityAuditMiddleware  # Temporarily disabled
+# from .api import (  # Temporarily disabled
+#     auth, users, memberships, exercises, routines, 
+#     classes, employees, payments, reports
+# )
+from .api.v1 import health, config
+from .api.v1.api import api_router
 
 # Configure logging
 logging.basicConfig(
@@ -86,15 +87,15 @@ app.add_middleware(
     ]
 )
 
-# Add custom middleware (order matters!) - Temporarily simplified for debugging
+# Add custom middleware (order matters!)
 app.add_middleware(SecurityMiddleware)
 app.add_middleware(DatabaseMiddleware)
 app.add_middleware(LoggingMiddleware)
 
-# Exception handlers - temporarily simplified for debugging
+# Exception handlers
 app.add_exception_handler(RequestValidationError, validation_exception_handler)
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)
-# app.add_exception_handler(Exception, general_exception_handler)  # Temporarily disabled
+app.add_exception_handler(Exception, general_exception_handler)
 
 # Health check endpoint
 @app.get("/health", tags=["Health"])
@@ -150,25 +151,17 @@ async def api_info():
     }
 
 # Include API routers
-app.include_router(auth.router, prefix="/api/v1/auth")
-app.include_router(users.router, prefix="/api/v1")
-app.include_router(memberships.router, prefix="/api/v1")
-app.include_router(exercises.router, prefix="/api/v1")
-app.include_router(routines.router, prefix="/api/v1")
-app.include_router(classes.router, prefix="/api/v1")
-app.include_router(employees.router, prefix="/api/v1")
-app.include_router(payments.router, prefix="/api/v1")
-app.include_router(reports.router, prefix="/api/v1")
 app.include_router(health.router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api/v1")
 app.include_router(config.router, prefix="/api/v1")
-app.include_router(audit.router, prefix="/api/v1")
-app.include_router(push_notifications.router, prefix="/api/v1")
-app.include_router(email.router, prefix="/api/v1")
-app.include_router(whatsapp.router, prefix="/api/v1")
-app.include_router(notifications.router, prefix="/api/v1")
-app.include_router(backup.router, prefix="/api/v1")
-app.include_router(monitoring.router, prefix="/api/v1")
-app.include_router(integrations.router, prefix="/api/v1")
+# app.include_router(audit.router, prefix="/api/v1")  # Temporarily disabled
+# app.include_router(push_notifications.router, prefix="/api/v1")  # Temporarily disabled
+# app.include_router(email.router, prefix="/api/v1")  # Temporarily disabled
+# app.include_router(whatsapp.router, prefix="/api/v1")  # Temporarily disabled
+# app.include_router(notifications.router, prefix="/api/v1")  # Temporarily disabled
+# app.include_router(backup.router, prefix="/api/v1")  # Temporarily disabled
+# app.include_router(monitoring.router, prefix="/api/v1")  # Temporarily disabled
+# app.include_router(integrations.router, prefix="/api/v1")  # Temporarily disabled
 
 # Custom error responses
 @app.exception_handler(404)

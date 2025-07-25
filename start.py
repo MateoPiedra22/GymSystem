@@ -2,38 +2,62 @@
 import os
 import subprocess
 import sys
+import platform
 
 def main():
-    # Get PORT from environment variable, default to 8000
+    # Get port from environment variable, default to 8000
     port = os.environ.get('PORT', '8000')
     
-    # Validate that port is a valid integer
+    # Validate port is a number
     try:
-        int(port)
-    except ValueError:
-        print(f"Error: PORT '{port}' is not a valid integer. Using default port 8000.")
-        port = '8000'
+        port_int = int(port)
+        if port_int < 1 or port_int > 65535:
+            raise ValueError("Port must be between 1 and 65535")
+    except ValueError as e:
+        print(f"Invalid port: {e}")
+        sys.exit(1)
     
-    # Build the uvicorn command
-    cmd = [
-        'python', '-m', 'uvicorn',
-        'backend.app.main:app',
-        '--host', '0.0.0.0',
-        '--port', port
-    ]
+    # Determine environment
+    environment = os.environ.get('ENVIRONMENT', 'production').lower()
+    is_windows = platform.system() == 'Windows'
     
-    print(f"Starting server on port {port}...")
-    print(f"Command: {' '.join(cmd)}")
+    if environment == 'development' or is_windows:
+        print(f"Starting development server on port {port}...")
+        # Use uvicorn with reload for development or Windows
+        command = [
+            'python', '-m', 'uvicorn', 
+            'backend.app.main:app',
+            '--host', '0.0.0.0',
+            '--port', str(port)
+        ]
+        if environment == 'development':
+            command.append('--reload')
+    else:
+        print(f"Starting production server on port {port}...")
+        # Set PORT environment variable for gunicorn
+        os.environ['PORT'] = str(port)
+        # Use gunicorn for production on Unix systems
+        command = [
+            'python', '-m', 'gunicorn',
+            'backend.app.main:app',
+            '-c', 'gunicorn.conf.py'
+        ]
     
-    # Execute uvicorn
+    print(f"Command: {' '.join(command)}")
+    
     try:
-        subprocess.run(cmd, check=True)
+        # Run the server
+        result = subprocess.run(command, check=True)
+        return result.returncode
     except subprocess.CalledProcessError as e:
         print(f"Error starting server: {e}")
-        sys.exit(1)
+        return e.returncode
     except KeyboardInterrupt:
         print("\nServer stopped by user")
-        sys.exit(0)
+        return 0
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+        return 1
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    sys.exit(main())
