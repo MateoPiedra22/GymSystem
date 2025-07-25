@@ -16,11 +16,11 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install wheel
-RUN pip install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip==25.1.1 setuptools wheel
 
 # Copy requirements and install Python dependencies
 COPY backend/requirements.txt .
-RUN pip install --no-cache-dir --verbose -r requirements.txt
+RUN pip install --no-cache-dir --force-reinstall -r requirements.txt
 
 # Copy the entire project
 COPY . .

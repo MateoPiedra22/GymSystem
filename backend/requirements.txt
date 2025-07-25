@@ -136,7 +136,7 @@ apscheduler==3.10.4
 
 # Advanced Validation
 # email-validator==2.1.0  # Removed - already included above
-# phone-validator==0.1.0  # Removed - use phonevalidator instead
+
 
 # Backup and Export
 # backup-utils==1.0.0  # Removed - custom implementation
