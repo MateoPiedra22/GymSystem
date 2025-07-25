@@ -96,4 +96,4 @@ qrcode[pil]==7.4.2
 regex==2023.10.3
 
 # Math and Calculations
-numpy==1
+numpy==1.25.2
