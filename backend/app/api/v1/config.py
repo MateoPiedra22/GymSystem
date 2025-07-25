@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 from ...core.auth import get_current_user, require_admin_access
 from ...services.config_service import (
-    config_service, ConfigType, ConfigScope, ConfigCategory, ConfigDefinition
+    get_config_service, ConfigType, ConfigScope, ConfigCategory, ConfigDefinition
 )
 from ...models.user import User
 import logging
@@ -133,7 +133,7 @@ async def get_config_value(
         if scope == ConfigScope.USER and not current_user.is_admin:
             user_id = current_user.id
         
-        value = config_service.get_config(
+        value = get_config_service().get_config(
             key, scope, tenant_id, user_id, session_id, environment
         )
         
@@ -141,7 +141,7 @@ async def get_config_value(
             raise HTTPException(status_code=404, detail="Configuration not found")
         
         # Get definition for metadata
-        definition = config_service.definitions.get(key)
+        definition = get_config_service().definitions.get(key)
         
         return {
             "key": key,
@@ -173,11 +173,11 @@ async def set_config_value(
             config_request.user_id = current_user.id
         
         # Check if config is readonly
-        definition = config_service.definitions.get(config_request.key)
+        definition = get_config_service().definitions.get(config_request.key)
         if definition and definition.readonly and not current_user.is_admin:
             raise HTTPException(status_code=403, detail="Configuration is read-only")
         
-        success = config_service.set_config(
+        success = get_config_service().set_config(
             key=config_request.key,
             value=config_request.value,
             scope=config_request.scope,
@@ -217,7 +217,7 @@ async def delete_config_value(
 ):
     """Delete a configuration value"""
     try:
-        success = config_service.delete_config(
+        success = get_config_service().delete_config(
             key=key,
             scope=scope,
             tenant_id=tenant_id,
@@ -263,13 +263,13 @@ async def get_all_configs(
         if category:
             try:
                 category_enum = ConfigCategory(category)
-                configs = config_service.get_category_configs(
+                configs = get_config_service().get_category_configs(
                     category_enum, scope, tenant_id, user_id, session_id, environment
                 )
             except ValueError:
                 raise HTTPException(status_code=400, detail="Invalid category")
         else:
-            configs = config_service.get_all_configs(
+            configs = get_config_service().get_all_configs(
                 scope, tenant_id, user_id, session_id, environment, include_sensitive
             )
         
@@ -295,7 +295,7 @@ async def get_config_definitions(
             except ValueError:
                 raise HTTPException(status_code=400, detail="Invalid category")
         
-        definitions = config_service.get_config_definitions(category_filter)
+        definitions = get_config_service().get_config_definitions(category_filter)
         
         return [
             ConfigDefinitionResponse(
@@ -336,7 +336,7 @@ async def get_config_history(
 ):
     """Get configuration change history"""
     try:
-        history = config_service.get_config_history(key, limit)
+        history = get_config_service().get_config_history(key, limit)
         
         return [
             ConfigHistoryResponse(**h)
@@ -353,7 +353,7 @@ async def validate_configs(
 ):
     """Validate all configurations"""
     try:
-        errors = config_service.validate_all_configs()
+        errors = get_config_service().validate_all_configs()
         
         return ConfigValidationResponse(
             valid=len(errors) == 0,
@@ -375,7 +375,7 @@ async def export_configs(
         if export_request.include_sensitive and not current_user.is_admin:
             raise HTTPException(status_code=403, detail="Admin access required for sensitive configurations")
         
-        exported_data = config_service.export_configs(
+        exported_data = get_config_service().export_configs(
             format=export_request.format,
             include_sensitive=export_request.include_sensitive,
             scope=export_request.scope,
@@ -403,7 +403,7 @@ async def import_configs(
 ):
     """Import configurations"""
     try:
-        results = config_service.import_configs(
+        results = get_config_service().import_configs(
             data=import_request.data,
             format=import_request.format,
             scope=import_request.scope,
@@ -434,7 +434,7 @@ async def get_config_statistics(
 ):
     """Get configuration statistics"""
     try:
-        definitions = config_service.get_config_definitions()
+        definitions = get_config_service().get_config_definitions()
         
         # Count by category
         category_counts = {}
@@ -488,14 +488,14 @@ async def reset_config_to_default(
 ):
     """Reset configuration to default value"""
     try:
-        definition = config_service.definitions.get(key)
+        definition = get_config_service().definitions.get(key)
         if not definition:
             raise HTTPException(status_code=404, detail="Configuration definition not found")
         
         if definition.default_value is None:
             raise HTTPException(status_code=400, detail="No default value defined for this configuration")
         
-        success = config_service.set_config(
+        success = get_config_service().set_config(
             key=key,
             value=definition.default_value,
             scope=scope,
@@ -526,11 +526,11 @@ async def reset_config_to_default(
 async def config_health_check():
     """Check configuration service health"""
     try:
-        total_definitions = len(config_service.definitions)
-        cached_configs = len(config_service.cache)
+        total_definitions = len(get_config_service().definitions)
+        cached_configs = len(get_config_service().cache)
         
         # Validate critical configs
-        validation_errors = config_service.validate_all_configs()
+        validation_errors = get_config_service().validate_all_configs()
         critical_errors = sum(1 for errors in validation_errors.values() if errors)
         
         return {
@@ -538,7 +538,7 @@ async def config_health_check():
             "total_definitions": total_definitions,
             "cached_configs": cached_configs,
             "validation_errors": critical_errors,
-            "encryption_enabled": config_service.encryption_key is not None,
+            "encryption_enabled": get_config_service().encryption_key is not None,
             "timestamp": datetime.utcnow().isoformat()
         }
         

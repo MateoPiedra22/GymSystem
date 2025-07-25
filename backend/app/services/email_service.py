@@ -19,7 +19,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON
 from ..core.database import Base, get_db
 from ..core.config import settings
-from .config_service import config_service
+from .config_service import get_config_service
 import os
 
 logger = logging.getLogger(__name__)
@@ -153,7 +153,7 @@ class EmailService:
         """Initialize email configuration from settings and config service"""
         try:
             # Get email configuration
-            email_config = config_service.get_category_configs("email")
+            email_config = get_config_service().get_category_configs("email")
             
             self.smtp_server = email_config.get("smtp_server", settings.SMTP_HOST)
             self.smtp_port = int(email_config.get("smtp_port", settings.SMTP_PORT or 587))
@@ -734,13 +734,13 @@ class EmailService:
         """Send welcome email to new member"""
         variables = {
             "first_name": user_name,
-            "gym_name": config_service.get_config("business_name", "Gym Management System"),
+            "gym_name": get_config_service().get_config("business_name", "Gym Management System"),
             "membership_type": membership_details.get("type", "Standard"),
             "start_date": membership_details.get("start_date", datetime.now().strftime("%Y-%m-%d")),
             "member_id": membership_details.get("member_id", "N/A"),
             "dashboard_url": f"https://{self.tracking_domain}/dashboard",
-            "gym_address": config_service.get_config("business_address", ""),
-            "gym_phone": config_service.get_config("business_phone", "")
+            "gym_address": get_config_service().get_config("business_address", ""),
+            "gym_phone": get_config_service().get_config("business_phone", "")
         }
         
         return await self.send_template_email(
@@ -759,9 +759,9 @@ class EmailService:
             "due_date": payment_details.get("due_date", ""),
             "description": payment_details.get("description", "Membership fee"),
             "payment_url": f"https://{self.tracking_domain}/payments",
-            "gym_name": config_service.get_config("business_name", "Gym Management System"),
-            "gym_address": config_service.get_config("business_address", ""),
-            "gym_phone": config_service.get_config("business_phone", "")
+            "gym_name": get_config_service().get_config("business_name", "Gym Management System"),
+            "gym_address": get_config_service().get_config("business_address", ""),
+            "gym_phone": get_config_service().get_config("business_phone", "")
         }
         
         return await self.send_template_email(
@@ -784,9 +784,9 @@ class EmailService:
             "instructor_name": class_details.get("instructor", ""),
             "location": class_details.get("location", ""),
             "class_url": f"https://{self.tracking_domain}/classes/{class_details.get('id', '')}",
-            "gym_name": config_service.get_config("business_name", "Gym Management System"),
-            "gym_address": config_service.get_config("business_address", ""),
-            "gym_phone": config_service.get_config("business_phone", "")
+            "gym_name": get_config_service().get_config("business_name", "Gym Management System"),
+            "gym_address": get_config_service().get_config("business_address", ""),
+            "gym_phone": get_config_service().get_config("business_phone", "")
         }
         
         return await self.send_template_email(

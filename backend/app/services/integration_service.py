@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON, Float
 from ..core.database import Base, get_db
 from ..core.config import settings
-from .config_service import config_service
+from .config_service import get_config_service
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import csv
@@ -188,7 +188,7 @@ class IntegrationService:
         """Load integration configurations"""
         try:
             # Load from configuration service
-            integration_configs = config_service.get_category_configs("integrations")
+            integration_configs = get_config_service().get_category_configs("integrations")
             
             for name, config in integration_configs.items():
                 if config.get("enabled", False):
@@ -589,7 +589,7 @@ class IntegrationService:
         """Add authentication to request"""
         if config.auth_type == AuthType.API_KEY:
             key_param = config.auth_config.get("key_param", "api_key")
-            key_value = config_service.get_config(config.auth_config.get("key_name", "api_key"))
+            key_value = get_config_service().get_config(config.auth_config.get("key_name", "api_key"))
             if key_value:
                 if config.auth_config.get("in_header", False):
                     headers[key_param] = key_value
@@ -597,26 +597,26 @@ class IntegrationService:
                     params[key_param] = key_value
         
         elif config.auth_type == AuthType.BEARER_TOKEN:
-            token_value = config_service.get_config(config.auth_config.get("token_key", "bearer_token"))
+            token_value = get_config_service().get_config(config.auth_config.get("token_key", "bearer_token"))
             if token_value:
                 headers["Authorization"] = f"Bearer {token_value}"
         
         elif config.auth_type == AuthType.BASIC_AUTH:
-            username = config_service.get_config(config.auth_config.get("username_key", "username"))
-            password = config_service.get_config(config.auth_config.get("password_key", "password"))
+            username = get_config_service().get_config(config.auth_config.get("username_key", "username"))
+            password = get_config_service().get_config(config.auth_config.get("password_key", "password"))
             if username and password:
                 credentials = base64.b64encode(f"{username}:{password}".encode()).decode()
                 headers["Authorization"] = f"Basic {credentials}"
         
         elif config.auth_type == AuthType.CUSTOM_HEADER:
             header_name = config.auth_config.get("header_name")
-            header_value = config_service.get_config(config.auth_config.get("header_key"))
+            header_value = get_config_service().get_config(config.auth_config.get("header_key"))
             if header_name and header_value:
                 headers[header_name] = header_value
         
         elif config.auth_type == AuthType.HMAC_SIGNATURE:
             # HMAC signature authentication
-            secret = config_service.get_config(config.auth_config.get("secret_key"))
+            secret = get_config_service().get_config(config.auth_config.get("secret_key"))
             if secret and data:
                 payload = json.dumps(data) if isinstance(data, dict) else str(data)
                 signature = hmac.new(
@@ -860,7 +860,7 @@ async def send_stripe_payment(amount: int, currency: str = "usd",
 
 async def send_twilio_sms(to: str, message: str, from_number: Optional[str] = None) -> Dict[str, Any]:
     """Send SMS via Twilio"""
-    account_sid = config_service.get_config("twilio_account_sid")
+    account_sid = get_config_service().get_config("twilio_account_sid")
     
     request = IntegrationRequest(
         method=RequestMethod.POST,
@@ -868,7 +868,7 @@ async def send_twilio_sms(to: str, message: str, from_number: Optional[str] = No
         data={
             "To": to,
             "Body": message,
-            "From": from_number or config_service.get_config("twilio_phone_number")
+            "From": from_number or get_config_service().get_config("twilio_phone_number")
         }
     )
     
@@ -877,7 +877,7 @@ async def send_twilio_sms(to: str, message: str, from_number: Optional[str] = No
 
 async def post_to_facebook(message: str, page_id: Optional[str] = None) -> Dict[str, Any]:
     """Post message to Facebook page"""
-    page_id = page_id or config_service.get_config("facebook_page_id")
+    page_id = page_id or get_config_service().get_config("facebook_page_id")
     
     request = IntegrationRequest(
         method=RequestMethod.POST,

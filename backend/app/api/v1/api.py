@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 # Import all API routers
-from app.api import (
+from ..api import (
     auth,
     users,
     employees,

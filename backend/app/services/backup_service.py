@@ -15,7 +15,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON, F
 from sqlalchemy import create_engine, MetaData, Table
 from ..core.database import Base, get_db, engine
 from ..core.config import settings
-from .config_service import config_service
+from .config_service import get_config_service
 import pandas as pd
 import boto3
 from botocore.exceptions import ClientError
@@ -177,7 +177,7 @@ class BackupService:
         """Initialize cloud storage clients"""
         try:
             # Initialize S3 client if configured
-            s3_config = config_service.get_category_configs("backup_s3")
+            s3_config = get_config_service().get_category_configs("backup_s3")
             if s3_config.get("enabled"):
                 self.s3_client = boto3.client(
                     's3',
@@ -575,7 +575,7 @@ class BackupService:
         backup_path = self.backup_dir / f"{backup_id}_config.json"
         
         # Export all configurations
-        all_configs = config_service.export_all_configs()
+        all_configs = get_config_service().export_all_configs()
         
         with open(backup_path, 'w') as f:
             json.dump(all_configs, f, indent=2)

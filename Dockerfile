@@ -25,6 +25,9 @@ RUN pip install --no-cache-dir -r requirements-minimal.txt
 # Copy the entire project
 COPY . .
 
+# Set Python path to include backend directory
+ENV PYTHONPATH=/app/backend:$PYTHONPATH
+
 # Expose port (Railway will set the PORT environment variable)
 EXPOSE 8000
 

@@ -12,6 +12,7 @@ from .employee import Employee
 from .user_progress import UserProgress, ProgressPhoto
 from .configuration import Configuration, NotificationTemplate, SystemLog
 from ..services.audit_service import AuditLogModel
+from ..services.config_service import ConfigModel, ConfigHistoryModel
 
 __all__ = [
     "User",
@@ -32,5 +33,7 @@ __all__ = [
     "Configuration",
     "NotificationTemplate",
     "SystemLog",
-    "AuditLogModel"
+    "AuditLogModel",
+    "ConfigModel",
+    "ConfigHistoryModel"
 ]

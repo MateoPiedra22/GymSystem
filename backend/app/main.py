@@ -42,6 +42,15 @@ async def lifespan(app: FastAPI):
         logger.error(f"Error creating database tables: {e}")
         raise
     
+    # Initialize configuration service after tables are created
+    try:
+        from .services.config_service import get_config_service
+        config_service = get_config_service()
+        logger.info("Configuration service initialized successfully")
+    except Exception as e:
+        logger.error(f"Error initializing configuration service: {e}")
+        # Don't raise here, let the app start without config service if needed
+    
     # Additional startup tasks
     logger.info("GymSystem API started successfully")
     

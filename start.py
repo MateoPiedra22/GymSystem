@@ -26,7 +26,7 @@ def main():
         # Use uvicorn with reload for development or Windows
         command = [
             'python', '-m', 'uvicorn', 
-            'backend.app.main:app',
+            'app.main:app',
             '--host', '0.0.0.0',
             '--port', str(port)
         ]
@@ -39,7 +39,7 @@ def main():
         # Use gunicorn for production on Unix systems
         command = [
             'python', '-m', 'gunicorn',
-            'backend.app.main:app',
+            'app.main:app',
             '-c', 'gunicorn.conf.py'
         ]
     

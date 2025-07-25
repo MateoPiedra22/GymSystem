@@ -44,7 +44,7 @@ raw_env = [
 ]
 
 # Application
-wsgi_module = 'backend.app.main:app'
+wsgi_module = 'app.main:app'
 
 # Restart workers after this many requests, to help prevent memory leaks
 max_requests = 1000

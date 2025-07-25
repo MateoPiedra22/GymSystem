@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON, Float
 from ..core.database import Base, get_db
 from ..core.config import settings
-from .config_service import config_service
+from .config_service import get_config_service
 from .email_service import email_service, EmailType
 from .whatsapp_service import whatsapp_service, MessageCategory as WhatsAppCategory
 from .push_notification_service import push_notification_service

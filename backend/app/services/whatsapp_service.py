@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON
 from ..core.database import Base, get_db
 from ..core.config import settings
-from .config_service import config_service
+from .config_service import get_config_service
 import base64
 import mimetypes
 from pathlib import Path
@@ -192,7 +192,7 @@ class WhatsAppService:
         """Initialize WhatsApp configuration"""
         try:
             # Get WhatsApp configuration
-            whatsapp_config = config_service.get_category_configs("whatsapp")
+            whatsapp_config = get_config_service().get_category_configs("whatsapp")
             
             self.access_token = whatsapp_config.get("access_token", settings.WHATSAPP_API_TOKEN)
             self.phone_number_id = whatsapp_config.get("phone_number_id", settings.WHATSAPP_PHONE_NUMBER_ID)

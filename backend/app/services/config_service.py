@@ -861,4 +861,13 @@ class ConfigService:
             logger.error(f"Failed to log config change: {e}")
 
 # Global configuration service instance
-config_service = ConfigService()
+# Note: Initialize this after database tables are created
+# config_service = ConfigService()
+config_service = None
+
+def get_config_service() -> ConfigService:
+    """Get or create the global configuration service instance"""
+    global config_service
+    if config_service is None:
+        config_service = ConfigService()
+    return config_service

@@ -13,7 +13,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON, F
 from sqlalchemy import func, text
 from ..core.database import Base, get_db, engine
 from ..core.config import settings
-from .config_service import config_service
+from .config_service import get_config_service
 # import aioredis  # Commented out due to Python 3.13 compatibility issues
 import aiofiles
 from collections import defaultdict, deque
