@@ -1,0 +1,158 @@
+# FastAPI and ASGI server
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+
+# Database
+sqlalchemy==2.0.23
+alembic==1.12.1
+psycopg2-binary==2.9.9
+
+# Authentication and Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Email
+email-validator==2.1.0
+
+# Environment and Configuration
+python-dotenv==1.0.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Date and Time
+python-dateutil==2.8.2
+
+# HTTP Requests
+httpx==0.25.2
+requests==2.31.0
+
+# Image Processing
+Pillow==10.1.0
+
+# File Handling
+aiofiles==23.2.1
+
+# Validation and Utilities
+validators==0.22.0
+phonevalidator==0.1.0
+
+# Logging and Monitoring
+loguru==0.7.2
+
+# Testing
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2
+
+# Development
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+
+# CORS
+fastapi-cors==0.0.6
+
+# Rate Limiting
+slowapi==0.1.9
+
+# Compression
+fastapi-gzip==0.1.0
+
+# Background Tasks
+celery==5.3.4
+redis==5.0.1
+
+# Excel/CSV Export
+openpyxl==3.1.2
+pandas==2.1.3
+
+# PDF Generation
+reportlab==4.0.7
+
+# QR Code Generation
+qrcode[pil]==7.4.2
+
+# Timezone
+pytz==2023.3
+
+# UUID
+uuid==1.30
+
+# JSON Web Tokens
+PyJWT==2.8.0
+
+# Cryptography
+cryptography==41.0.7
+
+# HTTP Status Codes
+http-status==0.1.0
+
+# String Utilities
+unidecode==1.3.7
+
+# Regular Expressions
+regex==2023.10.3
+
+# Math and Calculations
+numpy==1.25.2
+
+# Configuration Management
+click==8.1.7
+
+# WSGI/ASGI Utilities
+starlette==0.27.0
+
+# Async Support
+anyio==4.1.0
+
+# Type Hints
+typing-extensions==4.8.0
+
+# WhatsApp Integration
+twilio==8.10.0
+pywhatkit==5.4
+
+# Instagram Integration
+instagrapi==2.0.0
+
+# Advanced Image Processing
+opencv-python==4.8.1.78
+
+# Machine Learning for Routine Suggestions
+scikit-learn==1.3.2
+
+# WebSocket Support
+websockets==12.0
+fastapi-websocket==0.1.7
+
+# Advanced Caching
+fastapi-cache2==0.2.1
+
+# Task Scheduling
+apscheduler==3.10.4
+
+# File Upload and Storage
+fastapi-uploads==0.1.0
+
+# Advanced Validation
+email-validator==2.1.0
+phone-validator==0.1.0
+
+# Backup and Export
+backup-utils==1.0.0
+
+# Notification System
+fcm-django==1.0.12
+push-notifications==3.0.2
+
+# Advanced Analytics
+plotly==5.17.0
+matplotlib==3.8.2
+seaborn==0.13.0
+
+# API Documentation
+fastapi-users==12.1.2
+
+# Health Checks
+fastapi-health==0.4.0
