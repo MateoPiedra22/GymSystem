@@ -1,0 +1,392 @@
+# Docker Compose configuration for GymSystem Backend Development
+# This file provides a complete development environment with all services
+
+version: '3.8'
+
+services:
+  # FastAPI Application (Development)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gymsystem-api-dev
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=debug
+      - RELOAD=true
+      
+      # Database
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_NAME=gymsystem_dev
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=dev_password_123
+      - DATABASE_URL=postgresql://postgres:dev_password_123@db:5432/gymsystem_dev
+      
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=dev_redis_123
+      - REDIS_URL=redis://:dev_redis_123@redis:6379/0
+      
+      # Celery
+      - CELERY_BROKER_URL=redis://:dev_redis_123@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:dev_redis_123@redis:6379/0
+      - CELERY_ENABLED=true
+      
+      # Security
+      - SECRET_KEY=dev-secret-key-change-in-production-very-long-and-secure
+      - ACCESS_TOKEN_EXPIRE_MINUTES=60
+      - REFRESH_TOKEN_EXPIRE_DAYS=30
+      - ALGORITHM=HS256
+      
+      # CORS
+      - CORS_ORIGINS=["http://localhost:3000","http://localhost:3001","http://127.0.0.1:3000"]
+      - CORS_ALLOW_CREDENTIALS=true
+      
+      # Email (Development - Console backend)
+      - EMAIL_ENABLED=true
+      - EMAIL_BACKEND=console
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - SMTP_USER=
+      - SMTP_PASSWORD=
+      - SMTP_TLS=false
+      - SMTP_SSL=false
+      - EMAIL_FROM=noreply@gymsystem.local
+      - EMAIL_FROM_NAME=GymSystem Dev
+      
+      # File Upload
+      - UPLOAD_DIR=/app/uploads
+      - MAX_UPLOAD_SIZE=104857600
+      - ALLOWED_EXTENSIONS=["jpg","jpeg","png","gif","pdf","doc","docx"]
+      
+      # Rate Limiting (Relaxed for development)
+      - RATE_LIMIT_ENABLED=false
+      - RATE_LIMIT_PER_MINUTE=1000
+      
+      # Monitoring
+      - ENABLE_METRICS=true
+      - ENABLE_TRACING=false
+      
+      # Development specific
+      - RUN_MIGRATIONS=true
+      - CREATE_INITIAL_DATA=true
+      - TESTING=false
+      
+    volumes:
+      - .:/app
+      - dev_uploads:/app/uploads
+      - dev_logs:/app/logs
+      - dev_backups:/app/backups
+    depends_on:
+      - db
+      - redis
+      - mailhog
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: ["/app/entrypoint.sh", "web"]
+
+  # PostgreSQL Database (Development)
+  db:
+    image: postgres:15-alpine
+    container_name: gymsystem-db-dev
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=gymsystem_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dev_password_123
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - dev_postgres_data:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gymsystem_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_stat_statements
+      -c pg_stat_statements.track=all
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
+      -c maintenance_work_mem=64MB
+      -c checkpoint_completion_target=0.9
+      -c wal_buffers=16MB
+      -c default_statistics_target=100
+      -c random_page_cost=1.1
+      -c effective_io_concurrency=200
+      -c work_mem=4MB
+      -c min_wal_size=1GB
+      -c max_wal_size=4GB
+      -c log_statement=all
+      -c log_duration=on
+      -c log_min_duration_statement=0
+
+  # Redis (Development)
+  redis:
+    image: redis:7-alpine
+    container_name: gymsystem-redis-dev
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=dev_redis_123
+    volumes:
+      - dev_redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    command: redis-server --requirepass dev_redis_123 --appendonly yes --appendfsync everysec
+
+  # Celery Worker (Development)
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gymsystem-celery-worker-dev
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=debug
+      
+      # Database
+      - DATABASE_URL=postgresql://postgres:dev_password_123@db:5432/gymsystem_dev
+      
+      # Redis/Celery
+      - CELERY_BROKER_URL=redis://:dev_redis_123@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:dev_redis_123@redis:6379/0
+      - CELERY_LOG_LEVEL=debug
+      - CELERY_WORKER_CONCURRENCY=2
+      
+      # Security
+      - SECRET_KEY=dev-secret-key-change-in-production-very-long-and-secure
+      
+      # Email
+      - EMAIL_ENABLED=true
+      - EMAIL_BACKEND=console
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      
+    volumes:
+      - .:/app
+      - dev_uploads:/app/uploads
+      - dev_logs:/app/logs
+    depends_on:
+      - db
+      - redis
+      - mailhog
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+    command: ["/app/entrypoint.sh", "celery-worker"]
+
+  # Celery Beat Scheduler (Development)
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gymsystem-celery-beat-dev
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - LOG_LEVEL=debug
+      
+      # Database
+      - DATABASE_URL=postgresql://postgres:dev_password_123@db:5432/gymsystem_dev
+      
+      # Redis/Celery
+      - CELERY_BROKER_URL=redis://:dev_redis_123@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:dev_redis_123@redis:6379/0
+      - CELERY_LOG_LEVEL=debug
+      
+      # Security
+      - SECRET_KEY=dev-secret-key-change-in-production-very-long-and-secure
+      
+    volumes:
+      - .:/app
+      - dev_logs:/app/logs
+    depends_on:
+      - db
+      - redis
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+    command: ["/app/entrypoint.sh", "celery-beat"]
+
+  # Celery Flower (Monitoring)
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: gymsystem-flower-dev
+    ports:
+      - "5555:5555"
+    environment:
+      - ENVIRONMENT=development
+      - CELERY_BROKER_URL=redis://:dev_redis_123@redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://:dev_redis_123@redis:6379/0
+      - FLOWER_PORT=5555
+      - FLOWER_BASIC_AUTH=admin:dev123
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - celery-worker
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+    command: ["/app/entrypoint.sh", "flower"]
+
+  # MailHog (Email Testing)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: gymsystem-mailhog-dev
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+
+  # pgAdmin (Database Management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: gymsystem-pgadmin-dev
+    ports:
+      - "5050:80"
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@gymsystem.local
+      - PGADMIN_DEFAULT_PASSWORD=dev123
+      - PGADMIN_CONFIG_SERVER_MODE=False
+      - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+    volumes:
+      - dev_pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      - db
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+
+  # Redis Commander (Redis Management)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: gymsystem-redis-commander-dev
+    ports:
+      - "8081:8081"
+    environment:
+      - REDIS_HOSTS=local:redis:6379:0:dev_redis_123
+      - HTTP_USER=admin
+      - HTTP_PASSWORD=dev123
+    depends_on:
+      - redis
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+
+  # Nginx (Development Proxy)
+  nginx:
+    image: nginx:alpine
+    container_name: gymsystem-nginx-dev
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx-dev.conf:/etc/nginx/nginx.conf:ro
+      - dev_uploads:/app/uploads:ro
+    depends_on:
+      - api
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+
+  # Prometheus (Monitoring)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gymsystem-prometheus-dev
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - dev_prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+
+  # Grafana (Monitoring Dashboard)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gymsystem-grafana-dev
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=dev123
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - dev_grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
+    networks:
+      - gymsystem-dev
+    restart: unless-stopped
+
+# Networks
+networks:
+  gymsystem-dev:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# Volumes
+volumes:
+  dev_postgres_data:
+    driver: local
+  dev_redis_data:
+    driver: local
+  dev_pgadmin_data:
+    driver: local
+  dev_uploads:
+    driver: local
+  dev_logs:
+    driver: local
+  dev_backups:
+    driver: local
+  dev_prometheus_data:
+    driver: local
+  dev_grafana_data:
+    driver: local

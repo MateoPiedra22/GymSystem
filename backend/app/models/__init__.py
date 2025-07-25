@@ -1,64 +1,36 @@
-"""
-Inicialización del paquete de modelos
-"""
-# Este archivo permite importar todos los modelos desde app.models
+# Import all models here to make them available
+# This ensures SQLAlchemy can create all tables
 
-from app.models.usuarios import Usuario, Rol, usuario_rol
-from app.models.clases import Clase, DiaSemana, inscripcion_horario
-from app.models.asistencias import Asistencia
-from app.models.pagos import Pago, MetodoPago, EstadoPago, ConceptoPago, DetallePago
-from app.models.rutinas import (
-    Rutina, Ejercicio, ProgresoRutina, RutinaUsuario,
-    TipoEjercicio, NivelDificultad, rutina_ejercicio,
-    ConfiguracionEstilos
-)
-from app.models.logos import LogoPersonalizado
-from app.models.multimedia import (
-    MultimediaEjercicio, MultimediaRutina, AnotacionMultimedia, HistorialMultimedia,
-    ColeccionMultimedia, ItemColeccionMultimedia,
-    TipoMultimedia, EstadoMultimedia, CategoriaMultimedia
-)
-from app.models.empleados import (
-    Empleado, AsistenciaEmpleado, Nomina,
-    TipoContrato, EstadoEmpleado, Departamento
-)
-from app.models.tipos_cuota import TipoCuota
+from .user import User
+from .membership import Membership, Payment
+from .exercise import Exercise
+from .routine import RoutineTemplate, Routine, RoutineExercise, RoutineAssignment
+from .class_model import Class
+from .class_reservation import ClassReservation, ClassAttendance
+from .checkin import CheckIn
+from .employee import Employee
+from .user_progress import UserProgress, ProgressPhoto
+from .configuration import Configuration, NotificationTemplate, SystemLog
+from ..services.audit_service import AuditLogModel
 
-# Exportar Base para facilitar importaciones externas (Alembic, scripts)
-from app.core.database import Base
-
-# Lista de todos los modelos para facilitar las importaciones
 __all__ = [
-    # Usuarios
-    'Usuario', 'Rol', 'usuario_rol',
-    
-    # Clases
-    'Clase', 'DiaSemana', 'inscripcion_horario',
-    
-    # Asistencias
-    'Asistencia',
-    
-    # Pagos
-    'Pago', 'MetodoPago', 'EstadoPago', 'ConceptoPago', 'DetallePago',
-    
-    # Rutinas
-    'Rutina', 'Ejercicio', 'ProgresoRutina', 'RutinaUsuario',
-    'TipoEjercicio', 'NivelDificultad', 'rutina_ejercicio',
-    'ConfiguracionEstilos',
-    
-    # Logos
-    'LogoPersonalizado',
-    
-    # Multimedia  
-    'MultimediaEjercicio', 'MultimediaRutina', 'AnotacionMultimedia', 'HistorialMultimedia',
-    'ColeccionMultimedia', 'ItemColeccionMultimedia',
-    'TipoMultimedia', 'EstadoMultimedia', 'CategoriaMultimedia',
-    
-    # Empleados
-    'Empleado', 'AsistenciaEmpleado', 'Nomina',
-    'TipoContrato', 'EstadoEmpleado', 'Departamento',
-    
-    # Tipos de cuota
-    'TipoCuota',
-    'Base'
+    "User",
+    "Membership", 
+    "Payment",
+    "Exercise",
+    "RoutineTemplate",
+    "Routine", 
+    "RoutineExercise",
+    "RoutineAssignment",
+    "Class",
+    "ClassReservation",
+    "ClassAttendance",
+    "CheckIn",
+    "Employee",
+    "UserProgress",
+    "ProgressPhoto",
+    "Configuration",
+    "NotificationTemplate",
+    "SystemLog",
+    "AuditLogModel"
 ]

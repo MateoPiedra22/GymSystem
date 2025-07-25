@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Class Reminder</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; }
+        .content { padding: 20px; background: #f9f9f9; }
+        .footer { padding: 20px; text-align: center; color: #666; }
+        .button { display: inline-block; padding: 12px 24px; background: #28a745; color: white; text-decoration: none; border-radius: 5px; }
+        .class-info { background: white; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Class Reminder</h1>
+        </div>
+        <div class="content">
+            <h2>Hello {{ first_name }},</h2>
+            <p>Don't forget about your upcoming class!</p>
+            <div class="class-info">
+                <h3>{{ class_name }}</h3>
+                <p><strong>Date:</strong> {{ class_date }}</p>
+                <p><strong>Time:</strong> {{ start_time }} - {{ end_time }}</p>
+                <p><strong>Instructor:</strong> {{ instructor_name }}</p>
+                <p><strong>Location:</strong> {{ location }}</p>
+            </div>
+            <p>We look forward to seeing you there!</p>
+            <a href="{{ class_url }}" class="button">View Class Details</a>
+        </div>
+        <div class="footer">
+            <p>{{ gym_name }} | {{ gym_address }} | {{ gym_phone }}</p>
+        </div>
+    </div>
+</body>
+</html>
+            

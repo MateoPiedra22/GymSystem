@@ -1,315 +1,365 @@
-"""
-Módulo central para autenticación y autorización
-"""
-from datetime import datetime, timedelta, timezone
-from typing import Optional, Annotated, Union
-import secrets
-import hashlib
-
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
-import jwt
-from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
+from typing import Optional, Union
+from jose import JWTError, jwt
 from passlib.context import CryptContext
+from fastapi import HTTPException, status, Depends
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from sqlalchemy.orm import Session
+from ..core.config import settings
+from ..core.database import get_db
+from ..models.user import User
+from ..schemas.user import TokenData
+import secrets
+import string
 
-from app.core.config import settings
-from app.schemas.auth import TokenData
-from app.core.database import get_db
-from app.models.usuarios import Usuario
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Configuración OAuth2
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login/json")
+# Security scheme for JWT
+security = HTTPBearer()
 
-def _validate_jwt_payload(payload: dict) -> TokenData:
-    """Validar y extraer datos del payload JWT"""
-    # Validar claims requeridos
-    user_id: Optional[str] = payload.get("sub")
-    username: Optional[str] = payload.get("username")
-    admin: bool = payload.get("admin", False)
-    issuer: Optional[str] = payload.get("iss")
-    audience: Optional[str] = payload.get("aud")
-    jti: Optional[str] = payload.get("jti")  # JWT ID para revocación
-    exp: Optional[int] = payload.get("exp")  # Expiración
-    iat: Optional[int] = payload.get("iat")  # Emitido en
+class AuthManager:
+    """Authentication and authorization manager"""
     
-    # Validar que todos los claims requeridos estén presentes
-    if not all([user_id, username, issuer, audience, jti, exp, iat]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciales inválidas - claims faltantes",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    def __init__(self):
+        self.pwd_context = pwd_context
+        self.secret_key = settings.SECRET_KEY
+        self.algorithm = settings.ALGORITHM
+        self.access_token_expire_minutes = settings.ACCESS_TOKEN_EXPIRE_MINUTES
     
-    # Validar que el token no haya expirado
-    current_time = datetime.now(timezone.utc).timestamp()
-    if exp and current_time > exp:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expirado",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """Verify a plain password against its hash"""
+        return self.pwd_context.verify(plain_password, hashed_password)
     
-    # Validar que el token no sea del futuro
-    if iat and current_time < iat - 300:  # 5 minutos de tolerancia
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token emitido en el futuro",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+    def get_password_hash(self, password: str) -> str:
+        """Generate password hash"""
+        return self.pwd_context.hash(password)
     
-    return TokenData(sub=user_id, username=username, admin=admin)
+    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None) -> str:
+        """Create JWT access token"""
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=self.access_token_expire_minutes)
+        
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        return encoded_jwt
+    
+    def create_refresh_token(self, data: dict) -> str:
+        """Create JWT refresh token (longer expiration)"""
+        to_encode = data.copy()
+        expire = datetime.utcnow() + timedelta(days=7)  # 7 days for refresh token
+        to_encode.update({"exp": expire, "type": "refresh"})
+        encoded_jwt = jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        return encoded_jwt
+    
+    def verify_token(self, token: str) -> Optional[TokenData]:
+        """Verify and decode JWT token"""
+        try:
+            payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            user_id: int = payload.get("sub")
+            if user_id is None:
+                return None
+            token_data = TokenData(user_id=user_id)
+            return token_data
+        except JWTError:
+            return None
+    
+    def authenticate_user(self, db: Session, email: str, password: str) -> Optional[User]:
+        """Authenticate user with email and password"""
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return None
+        if not self.verify_password(password, user.password_hash):
+            return None
+        return user
+    
+    def generate_reset_token(self) -> str:
+        """Generate a secure reset token"""
+        alphabet = string.ascii_letters + string.digits
+        return ''.join(secrets.choice(alphabet) for _ in range(32))
+    
+    def validate_password_strength(self, password: str) -> tuple[bool, str]:
+        """Validate password strength based on settings"""
+        if len(password) < settings.PASSWORD_MIN_LENGTH:
+            return False, f"Password must be at least {settings.PASSWORD_MIN_LENGTH} characters long"
+        
+        if settings.REQUIRE_PASSWORD_COMPLEXITY:
+            has_upper = any(c.isupper() for c in password)
+            has_lower = any(c.islower() for c in password)
+            has_digit = any(c.isdigit() for c in password)
+            has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
+            
+            if not (has_upper and has_lower and has_digit and has_special):
+                return False, "Password must contain uppercase, lowercase, digit, and special character"
+        
+        return True, "Password is valid"
+    
+    def check_user_permissions(self, user: User, required_permission: str) -> bool:
+        """Check if user has required permission"""
+        permission_map = {
+            "admin_access": user.can_access_admin,
+            "manage_users": user.can_manage_users,
+            "manage_classes": user.can_manage_classes,
+            "create_routines": user.can_create_routines,
+            "staff_access": user.is_staff,
+        }
+        
+        return permission_map.get(required_permission, False)
+    
+    def is_token_blacklisted(self, token: str) -> bool:
+        """Check if token is blacklisted (implement with Redis in production)"""
+        # TODO: Implement token blacklisting with Redis
+        return False
+    
+    def blacklist_token(self, token: str) -> None:
+        """Add token to blacklist (implement with Redis in production)"""
+        # TODO: Implement token blacklisting with Redis
+        pass
 
-def _validate_token_issuer_audience(issuer: str, audience: str):
-    """Validar issuer y audience del token"""
-    # Validar issuer (debe ser nuestro dominio)
-    expected_issuer = f"gym-system-{settings.ENV}"
-    if issuer != expected_issuer:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token emitido por fuente no autorizada",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # Validar audience (debe ser nuestro cliente)
-    expected_audience = "gym-system-client"
-    if audience != expected_audience:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token no válido para este cliente",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+# Global auth manager instance
+auth_manager = AuthManager()
 
-def _validate_token_timestamps(payload: dict):
-    """Validar timestamps del token"""
-    exp = payload.get("exp")
-    iat = payload.get("iat")
-    
-    if exp is None or iat is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciales inválidas",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    current_time = datetime.now(timezone.utc).timestamp()
-    
-    # Verificar que el token no sea muy antiguo (más de 24 horas)
-    if current_time - iat > 86400:  # 24 horas
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token demasiado antiguo",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # Verificar que el token no sea del futuro (tolerancia de 5 minutos)
-    if iat > current_time + 300:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token con timestamp futuro inválido",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+# Standalone functions for backward compatibility
+def get_password_hash(password: str) -> str:
+    """Generate password hash"""
+    return auth_manager.get_password_hash(password)
 
-def _validate_user_id_format(user_id: str):
-    """Validar formato del ID de usuario"""
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a plain password against its hash"""
+    return auth_manager.verify_password(plain_password, hashed_password)
+
+# Dependency functions
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)) -> User:
+    """Get current authenticated user"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    
     try:
-        import uuid
-        uuid.UUID(user_id)
-    except (ValueError, TypeError):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Formato de ID de usuario inválido",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-def _decode_jwt_token(token: str) -> dict:
-    """Decodificar y validar token JWT"""
-    try:
-        payload = jwt.decode(
-            token, 
-            settings.SECRET_KEY, 
-            algorithms=[settings.ALGORITHM],
-            options={
-                "verify_signature": True,
-                "verify_exp": True,
-                "verify_iat": True,
-                "verify_iss": True,
-                "verify_aud": True,
-                "require": ["exp", "iat", "sub", "iss", "aud", "jti"]
-            }
-        )
-        return payload
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expirado",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    except jwt.InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciales inválidas",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-def _get_user_from_database(user_id: str, db: Session) -> Usuario:
-    """Obtener usuario de la base de datos"""
-    user = db.query(Usuario).filter(Usuario.id == user_id).first()
+        token = credentials.credentials
+        
+        # Check if token is blacklisted
+        if auth_manager.is_token_blacklisted(token):
+            raise credentials_exception
+        
+        # Verify token
+        token_data = auth_manager.verify_token(token)
+        if token_data is None:
+            raise credentials_exception
+        
+        # Get user from database
+        user = db.query(User).filter(User.id == token_data.user_id).first()
+        if user is None:
+            raise credentials_exception
+        
+        # Check if user is active
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Inactive user"
+            )
+        
+        return user
     
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Credenciales inválidas",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # Verificar si el usuario está activo
-    if not user.esta_activo:
+    except JWTError:
+        raise credentials_exception
+
+def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    """Get current active user"""
+    if not current_user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Usuario inactivo"
-        )
-    
-    return user
-
-async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
-    db: Session = Depends(get_db)
-) -> Usuario:
-    """
-    Obtiene el usuario actual basado en el token JWT
-    
-    Args:
-        token: Token JWT de autenticación
-        db: Sesión de base de datos
-        
-    Returns:
-        Usuario autenticado
-        
-    Raises:
-        HTTPException: Si el token es inválido o el usuario no existe
-    """
-    # Decodificar token
-    payload = _decode_jwt_token(token)
-    
-    # Validar payload
-    token_data = _validate_jwt_payload(payload)
-    
-    # Validar issuer y audience
-    _validate_token_issuer_audience(payload.get("iss"), payload.get("aud"))
-    
-    # Validar timestamps
-    _validate_token_timestamps(payload)
-    
-    # Validar formato de user_id
-    _validate_user_id_format(token_data.sub)
-    
-    # Obtener usuario de la base de datos
-    return _get_user_from_database(token_data.sub, db)
-
-async def get_current_admin_user(
-    current_user: Annotated[Usuario, Depends(get_current_user)]
-) -> Usuario:
-    """
-    Verifica que el usuario actual sea administrador
-    
-    Args:
-        current_user: Usuario autenticado
-        
-    Returns:
-        Usuario administrador
-        
-    Raises:
-        HTTPException: Si el usuario no tiene permisos de administrador
-    """
-    if not current_user.es_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Permisos insuficientes"
+            detail="Inactive user"
         )
     return current_user
 
-# Añadido: esquema OAuth2 opcional (no error si falta token)
-oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login/json", auto_error=False)
+def get_current_staff_user(current_user: User = Depends(get_current_active_user)) -> User:
+    """Get current staff user (admin, owner, trainer)"""
+    if not current_user.is_staff:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
+        )
+    return current_user
 
-async def get_current_user_optional(
-    token: Annotated[Optional[str], Depends(oauth2_scheme_optional)],
-    db: Session = Depends(get_db)
-) -> Optional[Usuario]:
-    """Devuelve el usuario autenticado si hay token; permite anónimo en entornos no producción.
+def get_current_admin_user(current_user: User = Depends(get_current_active_user)) -> User:
+    """Get current admin user (admin or owner)"""
+    if not current_user.can_access_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
 
-    Args:
-        token: Token JWT opcional.
-        db: Sesión de base de datos.
+def get_current_owner_user(current_user: User = Depends(get_current_active_user)) -> User:
+    """Get current owner user"""
+    if current_user.role != "OWNER":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Owner access required"
+        )
+    return current_user
 
-    Returns:
-        ``Usuario`` autenticado o ``None`` si no hay token y no estamos en producción.
+def require_permission(permission: str):
+    """Decorator to require specific permission"""
+    def permission_checker(current_user: User = Depends(get_current_active_user)) -> User:
+        if not auth_manager.check_user_permissions(current_user, permission):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permission '{permission}' required"
+            )
+        return current_user
+    return permission_checker
 
-    Raises:
-        HTTPException: Si el token falta o es inválido en producción.
-    """
-    # Si se proporciona token, reutilizar la lógica existente
-    if token:
-        # Reutilizamos get_current_user pasando el token explícitamente
-        return await get_current_user(token, db)  # type: ignore[arg-type]
+# Permission-specific dependencies
+require_admin_access = require_permission("admin_access")
+require_user_management = require_permission("manage_users")
+require_class_management = require_permission("manage_classes")
+require_routine_creation = require_permission("create_routines")
+require_staff_access = require_permission("staff_access")
+require_exercise_management = require_permission("manage_exercises")
+require_routine_management = require_permission("manage_routines")
+require_payment_management = require_permission("manage_payments")
+require_employee_management = require_permission("manage_employees")
+require_membership_management = require_permission("manage_memberships")
 
-    # Si no hay token, permitir acceso solo si no estamos en producción
-    if settings.ENV != "production":
+# Rate limiting helpers
+class RateLimiter:
+    """Simple rate limiter for authentication attempts"""
+    
+    def __init__(self):
+        self.attempts = {}  # In production, use Redis
+    
+    def is_rate_limited(self, identifier: str, max_attempts: int = 5, window_minutes: int = 15) -> bool:
+        """Check if identifier is rate limited"""
+        now = datetime.utcnow()
+        window_start = now - timedelta(minutes=window_minutes)
+        
+        if identifier not in self.attempts:
+            self.attempts[identifier] = []
+        
+        # Remove old attempts
+        self.attempts[identifier] = [
+            attempt_time for attempt_time in self.attempts[identifier]
+            if attempt_time > window_start
+        ]
+        
+        return len(self.attempts[identifier]) >= max_attempts
+    
+    def record_attempt(self, identifier: str) -> None:
+        """Record a failed attempt"""
+        now = datetime.utcnow()
+        if identifier not in self.attempts:
+            self.attempts[identifier] = []
+        self.attempts[identifier].append(now)
+    
+    def clear_attempts(self, identifier: str) -> None:
+        """Clear attempts for identifier (on successful login)"""
+        if identifier in self.attempts:
+            del self.attempts[identifier]
+
+# Global rate limiter instance
+rate_limiter = RateLimiter()
+
+# Utility functions
+def create_user_tokens(user: User) -> dict:
+    """Create access and refresh tokens for user"""
+    access_token_expires = timedelta(minutes=auth_manager.access_token_expire_minutes)
+    access_token = auth_manager.create_access_token(
+        data={"sub": str(user.id)}, expires_delta=access_token_expires
+    )
+    refresh_token = auth_manager.create_refresh_token(data={"sub": str(user.id)})
+    
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "expires_in": auth_manager.access_token_expire_minutes * 60
+    }
+
+def verify_refresh_token(token: str) -> Optional[int]:
+    """Verify refresh token and return user ID"""
+    try:
+        payload = jwt.decode(token, auth_manager.secret_key, algorithms=[auth_manager.algorithm])
+        user_id: int = payload.get("sub")
+        token_type: str = payload.get("type")
+        
+        if user_id is None or token_type != "refresh":
+            return None
+        
+        return int(user_id)
+    except JWTError:
         return None
 
-    # En producción, requerir credenciales
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Credenciales inválidas",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """Crear token JWT con claims completos y seguros"""
-    to_encode = data.copy()
-    
-    # Configurar expiración
-    if expires_delta:
-        expire = datetime.now(timezone.utc) + expires_delta
-    else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    # Agregar claims estándar de seguridad
-    to_encode.update({
-        "exp": expire,
-        "iat": datetime.now(timezone.utc),
-        "iss": f"gym-system-{settings.ENV}",  # Issuer
-        "aud": "gym-system-client",  # Audience
-        "jti": secrets.token_urlsafe(32),  # JWT ID único
-        "type": "access"  # Tipo de token
-    })
-    
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
-
-# Contexto de encriptación de contraseñas
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+def hash_password(password: str) -> str:
+    """Hash password using bcrypt"""
+    return auth_manager.get_password_hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """
-    Verifica una contraseña contra su hash
-    
-    Args:
-        plain_password: Contraseña en texto plano
-        hashed_password: Contraseña hasheada
-        
-    Returns:
-        True si la contraseña coincide, False en caso contrario
-    """
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify password against hash"""
+    return auth_manager.verify_password(plain_password, hashed_password)
 
-def get_password_hash(password: str) -> str:
-    """
-    Genera un hash de contraseña
+def generate_secure_token(length: int = 32) -> str:
+    """Generate a secure random token"""
+    alphabet = string.ascii_letters + string.digits
+    return ''.join(secrets.choice(alphabet) for _ in range(length))
+
+# Session management
+class SessionManager:
+    """Manage user sessions"""
     
-    Args:
-        password: Contraseña en texto plano
-        
-    Returns:
-        Hash de la contraseña
-    """
-    return pwd_context.hash(password)
+    def __init__(self):
+        self.active_sessions = {}  # In production, use Redis
+    
+    def create_session(self, user_id: int, token: str, expires_at: datetime) -> str:
+        """Create a new session"""
+        session_id = generate_secure_token()
+        self.active_sessions[session_id] = {
+            "user_id": user_id,
+            "token": token,
+            "expires_at": expires_at,
+            "created_at": datetime.utcnow()
+        }
+        return session_id
+    
+    def get_session(self, session_id: str) -> Optional[dict]:
+        """Get session by ID"""
+        session = self.active_sessions.get(session_id)
+        if session and session["expires_at"] > datetime.utcnow():
+            return session
+        elif session:
+            # Remove expired session
+            del self.active_sessions[session_id]
+        return None
+    
+    def invalidate_session(self, session_id: str) -> None:
+        """Invalidate a session"""
+        if session_id in self.active_sessions:
+            del self.active_sessions[session_id]
+    
+    def invalidate_user_sessions(self, user_id: int) -> None:
+        """Invalidate all sessions for a user"""
+        sessions_to_remove = [
+            session_id for session_id, session in self.active_sessions.items()
+            if session["user_id"] == user_id
+        ]
+        for session_id in sessions_to_remove:
+            del self.active_sessions[session_id]
+    
+    def cleanup_expired_sessions(self) -> None:
+        """Remove expired sessions"""
+        now = datetime.utcnow()
+        expired_sessions = [
+            session_id for session_id, session in self.active_sessions.items()
+            if session["expires_at"] <= now
+        ]
+        for session_id in expired_sessions:
+            del self.active_sessions[session_id]
+
+# Global session manager
+session_manager = SessionManager()
