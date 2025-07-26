@@ -31,7 +31,7 @@ limit_request_fields = 100
 limit_request_field_size = 8190
 
 # Application
-wsgi_module = "app.main:app"
+# wsgi_module not needed for FastAPI with UvicornWorker
 
 # Logging
 loglevel = os.getenv('LOG_LEVEL', 'info')

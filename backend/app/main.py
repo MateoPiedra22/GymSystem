@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 import logging
 from .core.config import settings
 from .core.database import engine, Base
+# Import all models to ensure tables are created
+from . import models
 from .core.middleware import (
     SecurityMiddleware, LoggingMiddleware, RateLimitMiddleware,
     DatabaseMiddleware, MaintenanceMiddleware, CompressionMiddleware,
