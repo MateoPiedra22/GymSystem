@@ -8,8 +8,8 @@ import logging
 from pathlib import Path
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, Text, DateTime, Boolean, JSON
-from ..core.database import Base, get_db
-from ..core.config import settings
+from app.core.database import Base, get_db
+from app.core.config import settings
 import yaml
 from cryptography.fernet import Fernet
 import base64

@@ -35,7 +35,7 @@ ENV PYTHONPATH=/app/backend:$PYTHONPATH
 EXPOSE 8000
 
 # Make start script executable (entrypoint.sh not needed for Railway)
-RUN chmod +x backend/start.py
+RUN chmod +x ./start.py
 
 # Command to run the application
 CMD ["python", "start.py"]

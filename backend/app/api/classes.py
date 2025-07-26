@@ -3,17 +3,17 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Background
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, func, desc, asc
 from datetime import datetime, date, time, timedelta
-from ..core.database import get_db
-from ..core.auth import (
+from app.core.database import get_db
+from app.core.auth import (
     get_current_active_user, get_current_staff_user, get_current_admin_user,
     require_class_management
 )
-from ..core.utils import ValidationUtils, DataUtils, BusinessUtils, DateUtils
-from ..models.user import User
-from ..models.class_model import Class
-from ..models.class_reservation import ClassReservation, ClassAttendance
-from ..models.employee import Employee
-from ..schemas.class_schema import (
+from app.core.utils import ValidationUtils, DataUtils, BusinessUtils, DateUtils
+from app.models.user import User
+from app.models.class_model import Class
+from app.models.class_reservation import ClassReservation, ClassAttendance
+from app.models.employee import Employee
+from app.schemas.class_schema import (
     ClassCreate, ClassUpdate, ClassResponse, ClassList, ClassStats,
     ClassReservationCreate, ClassReservationUpdate, ClassReservationResponse, ClassReservationList,
     ClassAttendanceCreate, ClassAttendanceUpdate, ClassAttendanceResponse, ClassAttendanceList,
@@ -731,8 +731,8 @@ async def send_reservation_confirmation(
     email: str, first_name: str, class_obj: Class, reservation: ClassReservation
 ):
     """Send reservation confirmation email"""
-    from ..core.utils import NotificationUtils
-    from ..core.config import settings
+    from app.core.utils import NotificationUtils
+    from app.core.config import settings
     
     subject = f"Reserva confirmada: {class_obj.name}"
     body = f"""
@@ -758,8 +758,8 @@ async def send_reservation_confirmation(
 
 async def send_cancellation_confirmation(email: str, first_name: str, class_obj: Class):
     """Send cancellation confirmation email"""
-    from ..core.utils import NotificationUtils
-    from ..core.config import settings
+    from app.core.utils import NotificationUtils
+    from app.core.config import settings
     
     subject = f"Reserva cancelada: {class_obj.name}"
     body = f"""

@@ -3,18 +3,18 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
-from ..core.database import get_db
-from ..core.auth import (
+from app.core.database import get_db
+from app.core.auth import (
     auth_manager, rate_limiter, create_user_tokens, verify_refresh_token,
     get_current_user, get_current_active_user
 )
-from ..core.utils import ValidationUtils, NotificationUtils, SecurityUtils
-from ..models.user import User
-from ..schemas.user import (
+from app.core.utils import ValidationUtils, NotificationUtils, SecurityUtils
+from app.models.user import User
+from app.schemas.user import (
     UserLogin, UserRegister, Token, PasswordChange, 
     PasswordReset, PasswordResetConfirm, UserResponse
 )
-from ..core.config import settings
+from app.core.config import settings
 import secrets
 import string
 

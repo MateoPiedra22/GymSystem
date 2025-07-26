@@ -2,11 +2,11 @@ from typing import Dict, List, Optional, Any, Union
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
-from ...core.auth import get_current_user, require_admin_access
-from ...services.config_service import (
+from app.core.auth import get_current_user, require_admin_access
+from app.services.config_service import (
     get_config_service, ConfigType, ConfigScope, ConfigCategory, ConfigDefinition
 )
-from ...models.user import User
+from app.models.user import User
 import logging
 
 logger = logging.getLogger(__name__)

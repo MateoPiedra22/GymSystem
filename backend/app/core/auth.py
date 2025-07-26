@@ -5,10 +5,10 @@ from passlib.context import CryptContext
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from ..core.config import settings
-from ..core.database import get_db
-from ..models.user import User
-from ..schemas.user import TokenData
+from app.core.config import settings
+from app.core.database import get_db
+from app.models.user import User
+from app.schemas.user import TokenData
 import secrets
 import string
 

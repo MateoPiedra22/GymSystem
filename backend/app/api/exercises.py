@@ -3,15 +3,15 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, UploadFile
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, desc, asc
 from datetime import datetime
-from ..core.database import get_db
-from ..core.auth import (
+from app.core.database import get_db
+from app.core.auth import (
     get_current_active_user, get_current_staff_user, get_current_admin_user,
     require_exercise_management
 )
-from ..core.utils import ValidationUtils, DataUtils, FileUtils
-from ..models.user import User
-from ..models.exercise import Exercise
-from ..schemas.exercise import (
+from app.core.utils import ValidationUtils, DataUtils, FileUtils
+from app.models.user import User
+from app.models.exercise import Exercise
+from app.schemas.exercise import (
     ExerciseCreate, ExerciseUpdate, ExerciseResponse, ExerciseList,
     ExerciseStats, ExerciseFilter, ExerciseSearch, ExerciseBulkCreate,
     ExerciseImport, ExerciseExport, CustomExerciseCreate, ExerciseTemplate,

@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Enum, ForeignKey, Float, JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from ..core.database import Base
+from app.core.database import Base
 import enum
 from datetime import datetime
 

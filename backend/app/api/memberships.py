@@ -4,15 +4,15 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, func, desc, asc
 from datetime import datetime, date, timedelta
 from decimal import Decimal
-from ..core.database import get_db
-from ..core.auth import (
+from app.core.database import get_db
+from app.core.auth import (
     get_current_active_user, get_current_staff_user, get_current_admin_user,
     require_membership_management
 )
-from ..core.utils import ValidationUtils, DataUtils, BusinessUtils, DateUtils
-from ..models.user import User
-from ..models.membership import Membership, Payment
-from ..schemas.membership import (
+from app.core.utils import ValidationUtils, DataUtils, BusinessUtils, DateUtils
+from app.models.user import User
+from app.models.membership import Membership, Payment
+from app.schemas.membership import (
     MembershipCreate, MembershipUpdate, MembershipResponse, MembershipList,
     MembershipStats, MembershipRenewal, MembershipFreeze, MembershipBulkCreate,
     PaymentCreate, PaymentResponse, PaymentList, PaymentStats
@@ -586,8 +586,8 @@ async def cancel_membership(
 # Background tasks
 async def send_membership_created_notification(email: str, first_name: str, membership: Membership):
     """Send notification when membership is created"""
-    from ..core.utils import NotificationUtils
-    from ..core.config import settings
+    from app.core.utils import NotificationUtils
+    from app.core.config import settings
     
     subject = f"¡Bienvenido a {settings.PROJECT_NAME}! Tu membresía está activa"
     body = f"""
@@ -612,8 +612,8 @@ async def send_membership_created_notification(email: str, first_name: str, memb
 
 async def send_membership_renewed_notification(email: str, first_name: str, membership: Membership):
     """Send notification when membership is renewed"""
-    from ..core.utils import NotificationUtils
-    from ..core.config import settings
+    from app.core.utils import NotificationUtils
+    from app.core.config import settings
     
     subject = f"Tu membresía en {settings.PROJECT_NAME} ha sido renovada"
     body = f"""
