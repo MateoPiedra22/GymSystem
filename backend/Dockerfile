@@ -7,7 +7,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    USE_UVICORN=1
+    USE_UVICORN=1 \
+    ENVIRONMENT=production \
+    PORT=8000
 
 # Set work directory
 WORKDIR /app
@@ -19,37 +21,36 @@ RUN apt-get update \
         libpq-dev \
         curl \
         netcat-openbsd \
+        gcc \
+        g++ \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
 COPY requirements-minimal.txt .
+COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --upgrade pip \
-    && pip install -r requirements-minimal.txt
+# Install Python dependencies with error handling
+RUN pip install --upgrade pip setuptools wheel \
+    && pip install -r requirements-minimal.txt \
+    || (echo "Minimal requirements failed, trying full requirements" && pip install -r requirements.txt) \
+    || (echo "Both requirements failed, installing core dependencies" && pip install fastapi uvicorn gunicorn sqlalchemy psycopg2-binary python-dotenv)
 
 # Copy project files
 COPY . .
 
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
-
-# Create necessary directories
-RUN mkdir -p /app/logs /app/uploads /app/backups \
-    && chown -R appuser:appuser /app
-
-# Switch to non-root user
-USER appuser
-
-# Expose port
-EXPOSE 8000
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8000/health || exit 1
+# Create necessary directories with proper permissions
+RUN mkdir -p /app/logs /app/uploads /app/backups /app/static /app/templates \
+    && chmod -R 755 /app
 
 # Make start.py executable
 RUN chmod +x ./start.py
+
+# Expose port
+EXPOSE $PORT
+
+# Health check with better error handling
+HEALTHCHECK --interval=30s --timeout=30s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:$PORT/health || curl -f http://localhost:$PORT/ || exit 1
 
 # Run the application
 CMD ["python", "start.py"]

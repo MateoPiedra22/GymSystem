@@ -49,6 +49,8 @@ async def lifespan(app: FastAPI):
         from .services.config_service import get_config_service
         config_service = get_config_service()
         logger.info("Configuration service initialized successfully")
+    except ImportError as e:
+        logger.warning(f"Configuration service not available: {e}")
     except Exception as e:
         logger.error(f"Error initializing configuration service: {e}")
         # Don't raise here, let the app start without config service if needed
