@@ -22,17 +22,20 @@ RUN pip install --upgrade pip setuptools wheel
 COPY requirements-minimal.txt .
 RUN pip install --no-cache-dir -r requirements-minimal.txt
 
-# Copy the entire project
-COPY . .
+# Copy the backend directory
+COPY backend/ ./backend/
 
-# Set Python path to include backend directory
+# Set working directory to backend
+WORKDIR /app/backend
+
+# Set Python path
 ENV PYTHONPATH=/app/backend:$PYTHONPATH
 
 # Expose port (Railway will set the PORT environment variable)
 EXPOSE 8000
 
 # Make start script executable (entrypoint.sh not needed for Railway)
-RUN chmod +x start.py
+RUN chmod +x backend/start.py
 
 # Command to run the application
 CMD ["python", "start.py"]

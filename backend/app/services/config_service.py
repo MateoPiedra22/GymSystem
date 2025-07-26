@@ -373,9 +373,13 @@ class ConfigService:
                 self.cache[cache_key] = value
                 
         except Exception as e:
-            logger.error(f"Failed to load configuration cache: {e}")
+            logger.warning(f"Failed to load configuration cache: {e}")
+            logger.info("Initializing with empty cache - database tables may not exist yet")
+            # Initialize with empty cache if database is not ready
+            self.cache = {}
         finally:
-            db.close()
+            if 'db' in locals():
+                db.close()
     
     def get_config(self, key: str, scope: ConfigScope = ConfigScope.GLOBAL,
                   tenant_id: Optional[int] = None, user_id: Optional[int] = None,
