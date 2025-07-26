@@ -20,18 +20,29 @@ def main():
     # Determine environment
     environment = os.environ.get('ENVIRONMENT', 'production').lower()
     is_windows = platform.system() == 'Windows'
+    force_uvicorn = os.environ.get('USE_UVICORN', '').lower() in ('1', 'true', 'yes')
     
-    if environment == 'development' or is_windows:
+    if environment == 'development':
         print(f"Starting development server on port {port}...")
-        # Use uvicorn with reload for development or Windows
+        # Use uvicorn with reload for development
         command = [
             'python', '-m', 'uvicorn', 
             'app.main:app',
             '--host', '0.0.0.0',
-            '--port', str(port)
+            '--port', str(port),
+            '--reload'
         ]
-        if environment == 'development':
-            command.append('--reload')
+    elif is_windows or force_uvicorn:
+        reason = "Windows" if is_windows else "forced by USE_UVICORN"
+        print(f"Starting production server on port {port} ({reason} - using uvicorn)...")
+        # Use uvicorn for Windows or when forced (gunicorn doesn't work on Windows)
+        command = [
+            'python', '-m', 'uvicorn', 
+            'app.main:app',
+            '--host', '0.0.0.0',
+            '--port', str(port),
+            '--workers', '1'
+        ]
     else:
         print(f"Starting production server on port {port}...")
         # Set PORT environment variable for gunicorn
